@@ -1,11 +1,12 @@
 import base64
 from typing import List
 from fastapi import Depends, HTTPException, status
+from sqlalchemy import select
 from fastapi_jwt_auth import AuthJWT
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 from . import models
-from .database import get_db
+from .database import get_session
 from sqlalchemy.orm import Session
 from .config import settings
 
@@ -36,11 +37,12 @@ class UserNotFound(Exception):
     pass
 
 
-def require_user(db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
+async def require_user(db: Session = Depends(get_session), Authorize: AuthJWT = Depends()):
     try:
         Authorize.jwt_required()
         user_id = Authorize.get_jwt_subject()
-        user = db.query(models.User).filter(models.User.id == user_id).first()
+        query = await db.execute(select(models.User).where(models.User.id == user_id))
+        user = query.scalar_one_or_none()
 
         if not user:
             raise UserNotFound('User no longer exist')

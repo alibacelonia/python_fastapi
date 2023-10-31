@@ -18,5 +18,7 @@ RUN pip install --upgrade pip
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
+RUN alembic upgrade head
+
 # add app
 COPY . .
