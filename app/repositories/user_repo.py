@@ -23,6 +23,36 @@ async def get_user_details(user_id: str, db: Session):
     except TimeoutError:
         raise HTTPException(status_code=500, detail="Task timed out")
 
+async def check_email(email: str, db: Session):
+    try:
+        query = await db.execute(
+            select(models.User).where(models.User.email == email)
+        )
+        user = query.scalar_one_or_none()
+        
+        if user:
+                raise HTTPException(status_code=409,
+                                    detail='Email is already in use.')
+        return {'details' : 'OK'}
+    
+    except TimeoutError:
+        raise HTTPException(status_code=500, detail="Task timed out")
+
+async def check_phone(phone: str, db: Session):
+    try:
+        query = await db.execute(
+            select(models.User).where(models.User.phone_number == phone)
+        )
+        user = query.scalar_one_or_none()
+        
+        if user:
+                raise HTTPException(status_code=409,
+                                    detail='Phone Number is already in use.')
+        return {'details' : 'OK'}
+    
+    except TimeoutError:
+        raise HTTPException(status_code=500, detail="Task timed out")
+
 async def add_user(db: Session, payload: CreateUserSchema):
     try:    
         # Check if user already exist

@@ -44,7 +44,7 @@ async def create_user(payload: CreateUserSchema, request: Request, db: Session =
     payload.password = utils.hash_password(payload.password)
     del payload.passwordConfirm
     payload.role = 'user'
-    payload.verified = False
+    payload.verified = True
     payload.email = EmailStr(payload.email.lower())
     
     

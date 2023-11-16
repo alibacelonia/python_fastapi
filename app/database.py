@@ -1,6 +1,4 @@
-from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 
 from app.models import PetType
 from .config import settings
@@ -24,10 +22,8 @@ from .config import settings
 
 import os
 from typing import List
-
-from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
 
@@ -44,14 +40,17 @@ async def init_db():
     session = SessionLocal()
     try:
         pet_types = [PetType(type="Dog"), PetType(type="Cat")]
-        session.add(pet_types)
+        session.add_all(pet_types)
         await session.commit()
     except Exception as e:
         await session.rollback()
     finally:
-        session.close()
+        await session.close()
 
 async def get_session() -> AsyncSession:
     async with SessionLocal() as session:
-        return session
+        try:
+            yield session
+        finally:
+            await session.close()
 

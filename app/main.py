@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from app.config import settings
 from app.database import init_db
-from app.routers import user, auth, post, pets
+from app.routers import user, auth, post, pets, city, country, state
 
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -61,6 +61,9 @@ app.include_router(auth.router, tags=['Auth'], prefix='/api/v2/auth')
 app.include_router(user.router, tags=['Users'], prefix='/api/v2/user')
 app.include_router(pets.router, tags=['Pets'], prefix='/api/v2/pet')
 app.include_router(post.router, tags=['Posts'], prefix='/api/v2/post')
+app.include_router(city.router, tags=['Cities'], prefix='/api/v2/city')
+app.include_router(state.router, tags=['States'], prefix='/api/v2/state')
+app.include_router(country.router, tags=['Countries'], prefix='/api/v2/country')
 
 
 @app.on_event("startup")

@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 from pydantic import BaseModel, EmailStr, constr
-from app.schemas.user_schema import FilteredUserResponse
+from app.schemas.user_schema import FilteredUserResponse, CreateUserSchema, PetDetailsUserResponse
 
     
 class PetBaseSchema(BaseModel):
@@ -50,30 +50,58 @@ class ListPetResponse(BaseModel):
 
 
 class PetRegisterModel(BaseModel):
+    firstname: str 
+    lastname: str
+    email: EmailStr
+    phone_number: str
     
-    firstname:  str = None
-    lastname:  str = None
-    email:  str = None
-    state:  str = None
-    state_code:  str = None
-    city:  str = None
-    city_id:  str = None
-    address:  str = None
-    postal_code:  str = None
-    phone_no:  str = None
-    contact_person:  str = None
-    contact_person_no:  str = None
+    state_code: str
+    state: str
+    
+    city_code: int
+    city: str
+    
+    street_address: str
+    postal_code: str
+    
+    secondary_contact: str
+    secondary_contact_number: str
+    
+    password: str
+    confirm_password: str
+    
+    verified: bool = False
+    verification_code: str | None = None
+    role: str = "User"
+    
+    photo: str | None = None
+    
+    country_code: str = "AU"
+    country: str = "Australia"
+    
+    
+    name: str
+    breed: str
+    pet_type_id: int
+    microchip_id: str
+    unique_id: str
+    main_picture: str | None = None
+    color: str
+    gender: str
+    date_of_birth_year: int
+    date_of_birth_month: int
+    weight: int
+    behavior: str | None = None
+    description: str | None = None
 
-    guid: UUID = None
-    pet_type: int = None
-    pet_gender:  str = None
-    pet_name:  str = None
-    pet_microchip_no: str = None
-    pet_breed: str = None
-    pet_weight: float = None
-    pet_color:  str = None
-    pet_birth_month: int = None
-    pet_birth_year: int = None
-    
-    username: str = None
-    password: str = None
+class PetTypeResponse(BaseModel):
+    type_id: str = None
+    type: str = None
+
+    class Config:
+        orm_mode = True
+        
+class FilteredPetResponse(BaseModel):
+    pet: PetBaseSchema
+    owner: PetDetailsUserResponse
+    pet_type: PetTypeResponse

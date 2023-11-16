@@ -34,7 +34,7 @@ class CreateUserSchema(UserBaseSchema):
     secondary_contact_number: str = None
     
     password: constr(min_length=8)
-    passwordConfirm: str
+    passwordConfirm: constr(min_length=8)
     role: str = 'user'
     verified: bool = True
     verification_code: str = None
@@ -76,3 +76,18 @@ class UserResponse(UserBaseSchema):
 
 class FilteredUserResponse(UserBaseSchema):
     id: uuid.UUID = None
+    
+class EmailSchema(BaseModel):
+    email: str
+class PhoneSchema(BaseModel):
+    phone: str
+    
+    
+class PetDetailsUserResponse(BaseModel):
+    email: str
+    phone_number: str
+    secondary_contact: str
+    secondary_contact_number: str
+
+    class Config:
+        orm_mode = True
