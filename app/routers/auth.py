@@ -2,11 +2,13 @@ from datetime import timedelta
 import hashlib
 from random import randbytes
 from fastapi import APIRouter, Request, Response, status, Depends, HTTPException
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import EmailStr
 from sqlalchemy import or_, select
 
 from app import oauth2
-from ..schemas.user_schema import CreateUserSchema, LoginUserSchema, UserBaseSchema
+from ..schemas.user_schema import ChangePasswordUserSchema, CreateUserSchema, LoginUserSchema, UserBaseSchema
 from .. import models, utils
 from sqlalchemy.orm import Session
 from ..database import get_session
@@ -16,6 +18,7 @@ from ..email import Email
 
 
 router = APIRouter()
+templates = Jinja2Templates(directory="app/templates")
 ACCESS_TOKEN_EXPIRES_IN = settings.ACCESS_TOKEN_EXPIRES_IN
 REFRESH_TOKEN_EXPIRES_IN = settings.REFRESH_TOKEN_EXPIRES_IN
 
@@ -44,7 +47,7 @@ async def create_user(payload: CreateUserSchema, request: Request, db: Session =
     payload.password = utils.hash_password(payload.password)
     del payload.passwordConfirm
     payload.role = 'user'
-    payload.verified = True
+    payload.verified = False
     payload.email = EmailStr(payload.email.lower())
     
     
@@ -54,7 +57,7 @@ async def create_user(payload: CreateUserSchema, request: Request, db: Session =
     hashedCode.update(token)
     verification_code = hashedCode.hexdigest()
     
-    payload.firstname = verification_code
+    # payload.firstname = verification_code
     payload.verification_code = verification_code
     
     new_user = models.User(**payload.dict())
@@ -63,7 +66,7 @@ async def create_user(payload: CreateUserSchema, request: Request, db: Session =
     await db.refresh(new_user)
 
     try:
-        url = f"{request.url.scheme}://{request.client.host}:{request.url.port}/api/auth/verifyemail/{token.hex()}"
+        url = f"{request.url.scheme}://{request.client.host}:{request.url.port}/api/v2/auth/verifyemail/{token.hex()}"
         await Email(new_user, url, [payload.email]).sendVerificationCode()
     except Exception as error:
         print('Error', error)
@@ -156,21 +159,67 @@ async def logout(response: Response, Authorize: AuthJWT = Depends(), user_id: st
 
 
 @router.get('/verifyemail/{token}')
-async def verify_me(token: str, db: Session = Depends(get_session)):
+async def verify_me(token: str, request: Request, db: Session = Depends(get_session)):
     hashedCode = hashlib.sha256()
     hashedCode.update(bytes.fromhex(token))
     verification_code = hashedCode.hexdigest()
-    user_query = db.query(models.User).filter(
-        models.User.verification_code == verification_code)
-    db.commit()
-    user = user_query.first()
+    
+    query = await db.execute(select(models.User).where(
+        models.User.verification_code == verification_code))
+    user = query.scalar_one_or_none()
     if not user:
+        # raise HTTPException(
+        #     status_code=status.HTTP_403_FORBIDDEN, detail='Email can only be verified once')
+        return templates.TemplateResponse("already_verified.html",{"request": request})
+        
+    user.verification_code = verification_code
+    
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    user.verification_code = None
+    user.verified = True
+    
+    db.add(user)
+    await db.commit()
+    return templates.TemplateResponse("success_verification.html",{"request": request})
+
+
+# @router.get('/otp/{id}')
+# async def send_otp(request: Request, response_class=HTMLResponse):
+#     return templates.TemplateResponse("success_verification.html",{"request": request})
+
+@router.post('/change_password')
+async def login(payload: ChangePasswordUserSchema, db: Session = Depends(get_session), user_id: str = Depends(oauth2.require_user)):
+    # Check if the user exist
+    query = await db.execute(select(models.User).where(models.User.id == user_id))
+    user: models.User = query.scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail='You are not authenticated')
+
+    # Check if the password is valid
+    if not utils.verify_password(payload.current_password, user.password):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail='Incorrect Password')
+        
+    # Compare password and passwordConfirm
+    if payload.new_password != payload.confirm_password:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail='Email can only be verified once')
-    user_query.update(
-        {'verified': True, 'verification_code': None}, synchronize_session=False)
-    db.commit()
-    return {
-        "status": "success",
-        "message": "Account verified successfully"
-    }
+            status_code=status.HTTP_400_BAD_REQUEST, detail='Passwords do not match')
+    #  Hash the password
+    user.password = utils.hash_password(payload.new_password)
+    
+    
+    try:
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+        return {'status': 'success'}
+    except:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail='Passwords do not match')
+
+    

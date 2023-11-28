@@ -17,14 +17,16 @@ class EmailSchema(BaseModel):
 
 
 class Email:
-    def __init__(self, user: models.User, url: str, email: List[EmailStr]):
-        self.name = user.firstname + " " + user.lastname
-        self.sender = 'Codevo <admin@admin.com>'
+    def __init__(self, user: models.User, url: str = None, email: List[EmailStr] = None, otp_code: str = None):
+        self.name = user.firstname
+        # self.name = user.firstname + " " + user.lastname
+        self.sender = 'PetNFC <support@petnfc.com.au>'
         self.email = email
         self.url = url
+        self.otp_code = otp_code
         pass
 
-    async def sendMail(self, subject, template):
+    async def sendMail(self, subject, template, **kwargs):
         # Define the config
         conf = ConnectionConfig(
             MAIL_USERNAME=settings.EMAIL_USERNAME,
@@ -32,19 +34,15 @@ class Email:
             MAIL_FROM=settings.EMAIL_FROM,
             MAIL_PORT=settings.EMAIL_PORT,
             MAIL_SERVER=settings.EMAIL_HOST,
-            MAIL_STARTTLS=True,
-            MAIL_SSL_TLS=False,
+            MAIL_STARTTLS=False,
+            MAIL_SSL_TLS=True,
             USE_CREDENTIALS=True,
             VALIDATE_CERTS=True
         )
         # Generate the HTML template base on the template name
         template = env.get_template(f'{template}.html')
 
-        html = template.render(
-            url=self.url,
-            first_name=self.name,
-            subject=subject
-        )
+        html = template.render(**kwargs)
 
         # Define the message options
         message = MessageSchema(
@@ -59,4 +57,8 @@ class Email:
         await fm.send_message(message)
 
     async def sendVerificationCode(self):
-        await self.sendMail('Your verification code (Valid for 10min)', 'verification')
+        
+        await self.sendMail(subject='Your verification code (Valid for 5min)', template='verification', url=self.url, first_name=self.name)
+        
+    async def sendOTP(self):
+        await self.sendMail(subject='One-Time Password Code', template='otp', first_name=self.name, otp_code=self.otp_code)

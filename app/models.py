@@ -40,11 +40,28 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
     
+    otp = Column(String, nullable=True)
+    otp_secret = Column(String, nullable=True)
+    otp_created_at = Column(TIMESTAMP(timezone=True),nullable=True)
+    
     created_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text("now()"))
     updated_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text("now()"))
     
     pets = relationship('Pet', back_populates='owner', uselist=True)
 
+    def to_dict(self):
+            # Convert the User instance to a dictionary
+            user_dict = {column.name: getattr(self, column.name) for column in self.__table__.columns}
+            
+            # Convert UUID to string
+            user_dict['id'] = str(user_dict['id']) if user_dict['id'] else None
+
+            # Convert datetime objects to string
+            user_dict['created_at'] = user_dict['created_at'].isoformat() if user_dict['created_at'] else None
+            user_dict['updated_at'] = user_dict['updated_at'].isoformat() if user_dict['updated_at'] else None
+            user_dict['otp_created_at'] = user_dict['otp_created_at'].isoformat() if user_dict['otp_created_at'] else None
+
+            return user_dict
 
 class PetType(Base):
     __tablename__ = 'pet_type'
@@ -105,6 +122,29 @@ class Post(Base):
     content = Column(String, nullable=False)
     category = Column(String, nullable=False)
     image = Column(String, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
+    user = relationship('User')
+
+class Feedback(Base):
+    __tablename__ = 'feedback'
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, nullable=False,default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    rate = Column(Integer, nullable=False)
+    comment = Column(String, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
+    user = relationship('User')
+    
+class UserSettings(Base):
+    __tablename__ = 'settings'
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, nullable=False,default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    account = Column(String, nullable=True)
+    security = Column(String, nullable=True)
+    notification = Column(String, nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
     user = relationship('User')

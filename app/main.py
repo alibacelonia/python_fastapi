@@ -45,7 +45,6 @@ class BaseResponseModel(BaseModel):
 
 origins = [
     settings.CLIENT_ORIGIN,
-    "http://192.168.1.3:3000"
 ]
 
 app.add_middleware(

@@ -24,6 +24,14 @@ class Settings(BaseSettings):
     EMAIL_USERNAME: str
     EMAIL_PASSWORD: str
     EMAIL_FROM: EmailStr
+    
+    TWILIO_ACCOUNT_SSID: str
+    TWILIO_AUTH_TOKEN: str
+    SENDGRID_API_KEY: str
+    
+    OTP_SECRET: str
+    
+    ENCRYPTION_KEY:str
 
     class Config:
         env_file = './.env'

@@ -4,22 +4,61 @@ from pydantic import EmailStr
 from sqlalchemy import or_, select
 
 from app import utils
+from app.email import Email
+from app.schemas.pet_schema import UpdatePetSchema
 
-from ..schemas.user_schema import CreateUserSchema, UserResponse
+from ..schemas.user_schema import CreateUserSchema, UpdateUserSchema, UserResponse
 from ..database import get_session
 from sqlalchemy.orm import Session
 from .. import models, oauth2
+from ..config import settings
+import pyotp
+from twilio.rest import Client
+from datetime import datetime, timedelta
+import pytz
 
 router = APIRouter()
 
+
+australia_timezone = pytz.timezone('Australia/Sydney')
+philippines_timezone = pytz.timezone('Asia/Manila')
 
 async def get_user_details(user_id: str, db: Session):
     try:
         query = await db.execute(
             select(models.User).where(models.User.id == user_id)
         )
-        user = query.scalar_one_or_none()
-        return user
+        user: models.User = query.scalar_one_or_none()
+        
+        user_response = UserResponse(
+            id=user.id,
+            firstname=user.firstname,
+            lastname=user.lastname,
+            street_address=user.street_address,
+            postal_code=user.postal_code,
+            city_code=user.city_code,
+            city=user.city,
+            state_code=user.state_code,
+            state=user.state,
+            country_code=user.country_code,
+            country=user.country,
+            phone_number=user.phone_number,
+            photo=user.photo,
+            secondary_contact=user.secondary_contact,
+            secondary_contact_number=user.secondary_contact_number,
+            verified=user.verified,
+            verification_code=user.verification_code,
+            otp=user.otp,
+            otp_secret=user.otp_secret,
+            otp_created_at=user.otp_created_at,
+            role=user.role,
+            email=user.email,
+            password=user.password,
+            created_at=user.created_at,
+            updated_at=user.updated_at
+        )
+        return user_response
+    
     except TimeoutError:
         raise HTTPException(status_code=500, detail="Task timed out")
 
@@ -91,3 +130,154 @@ async def add_user(db: Session, payload: CreateUserSchema):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=status.WS_1011_INTERNAL_ERROR, detail=str(e))
+    
+# update user with authentication
+async def update_user(user: UpdateUserSchema, db: Session, user_id: str):
+    
+    pet_query = await db.execute(
+            select(models.User).where(models.User.id == user_id)
+        )
+    updated_user:UserResponse = pet_query.scalar_one_or_none()
+
+    if not updated_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'User not found')
+        
+    if updated_user is not None:
+            for key, value in user.dict(exclude_unset=True).items():
+                setattr(updated_user, key, value)
+                
+            if user.email is not None:
+                setattr(updated_user, 'otp', None)
+                setattr(updated_user, 'otp_secret', None)
+                setattr(updated_user, 'otp_created_at', None)
+                
+            await db.commit()
+    return updated_user
+
+async def send_sms():
+    account_sid = settings.TWILIO_ACCOUNT_SSID
+    auth_token = settings.TWILIO_AUTH_TOKEN
+    client = Client(account_sid, auth_token)
+
+    message = client.messages \
+                    .create(
+                        body="Join Earth's mightiest heroes. Like Kevin Bacon.",
+                        from_='+12674634768',
+                        to='+639616398508'
+                 )
+    return message.sid
+
+async def send_otp(db: Session, user_id: str):
+    query = await db.execute(
+        select(models.User).where(models.User.id == user_id)
+    )
+    user = query.scalar_one_or_none()
+    
+    if not user:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                detail='You are not authenticated')
+    if user.otp_secret is None:
+        user.otp_secret = pyotp.random_base32()
+        
+    totp = pyotp.TOTP(user.otp_secret, interval=600)
+    user.otp = totp.now() 
+    current_utc_time = datetime.utcnow()
+    new_utc_time = current_utc_time + timedelta(minutes=5, seconds=5)
+    user.otp_created_at = new_utc_time.replace(tzinfo=pytz.utc).astimezone(philippines_timezone)
+    await db.commit()
+    await db.refresh(user)
+    return user
+    
+async def verify_otp(otp_code: str, db: Session, user_id: str):
+    try:
+        query = await db.execute(
+            select(models.User).where(models.User.id == user_id)
+        )
+        user: models.User = query.scalar_one_or_none()
+        
+        if not user:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                    detail='You are not authenticated')
+            
+        
+        totp = pyotp.TOTP(user.otp_secret, interval=600)
+        result = totp.verify(otp_code)
+        return { 'isValid' : result}
+        
+    except TimeoutError:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="Task timed out")
+    
+async def reset_otp(db: Session, user_id: str):
+    try:
+        query = await db.execute(
+            select(models.User).where(models.User.id == user_id)
+        )
+        user: models.User = query.scalar_one_or_none()
+        
+        if not user:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                    detail='You are not authenticated')
+            
+            
+        
+        user.otp = None
+        user.otp_secret = None
+        user.otp_created_at = None
+        
+        await db.commit()
+        
+        user_response = UserResponse(
+            id=user.id,
+            firstname=user.firstname,
+            lastname=user.lastname,
+            street_address=user.street_address,
+            postal_code=user.postal_code,
+            city_code=user.city_code,
+            city=user.city,
+            state_code=user.state_code,
+            state=user.state,
+            country_code=user.country_code,
+            country=user.country,
+            phone_number=user.phone_number,
+            photo=user.photo,
+            secondary_contact=user.secondary_contact,
+            secondary_contact_number=user.secondary_contact_number,
+            verified=user.verified,
+            verification_code=user.verification_code,
+            otp=None,
+            otp_secret=None,
+            otp_created_at=None,
+            role=user.role,
+            email=user.email,
+            password=user.password,
+            created_at=user.created_at,
+            updated_at=user.updated_at
+        )
+        return user_response
+        
+    except TimeoutError:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="Task timed out")
+    
+async def get_remaining_time(db: Session, user_id: str):
+    try:
+        query = await db.execute(
+            select(models.User).where(models.User.id == user_id)
+        )
+        user: models.User = query.scalar_one_or_none()
+        
+        if not user:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                    detail='You are not authenticated')
+            
+        
+        totp = pyotp.TOTP(user.otp_secret)
+        
+        return { 'time_remaining' : totp.interval - datetime.now().timestamp() % totp.interval}
+        
+    except TimeoutError:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="Task timed out")
+    
