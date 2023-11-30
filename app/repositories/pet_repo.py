@@ -130,9 +130,15 @@ async def update_my_pet_formdata(user_id: str, pet: UpdatePetSchema, file: Uploa
 # update pet without authentication
 async def get_pet(id: str, db: Session):
     try:
-        query = select(models.Pet, models.User, models.PetType).join(models.User).where((models.Pet.unique_id == id) & (models.Pet.owner_id == models.User.id) & (models.Pet.pet_type_id == models.PetType.type_id))
+        query = (
+            select(models.Pet, models.User, models.PetType)
+            .join(models.User, models.Pet.owner_id == models.User.id, isouter=True)  # Use isouter=True for a left join
+            .join(models.PetType, models.Pet.pet_type_id == models.PetType.type_id, isouter=True)  # Add an outer join for PetType as well if needed
+            .where(models.Pet.unique_id == id)
+        )
         result = await db.execute(query)
         pet, user, pet_type = result.first()
+        # return result.first()
         if not pet:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Pet not found')
         return FilteredPetResponse(pet=pet, owner=user, pet_type=pet_type)

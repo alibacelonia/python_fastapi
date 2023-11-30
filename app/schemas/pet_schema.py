@@ -103,5 +103,5 @@ class PetTypeResponse(BaseModel):
         
 class FilteredPetResponse(BaseModel):
     pet: PetBaseSchema
-    owner: PetDetailsUserResponse
-    pet_type: PetTypeResponse
+    owner: PetDetailsUserResponse = None
+    pet_type: PetTypeResponse = None
