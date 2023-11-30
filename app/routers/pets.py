@@ -5,7 +5,7 @@ from app.schemas.user_schema import CreateUserSchema
 from .. import models
 from ..schemas.pet_schema import PetBaseSchema, PetRegisterModel, PetResponse, ListPetResponse, CreatePetSchema, PetTypeResponse, UpdatePetSchema
 from sqlalchemy.orm import Session
-from fastapi import Depends, File, Form, HTTPException, UploadFile, status, APIRouter, Response
+from fastapi import Depends, File, Form, HTTPException, Request, UploadFile, status, APIRouter, Response
 from ..database import get_session
 from app.oauth2 import require_user
 from ..repositories import pet_repo
@@ -94,44 +94,45 @@ async def delete_pet(id: str, db: Session = Depends(get_session), user_id: str =
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @router.put('/register/')
-async def register_pet( request: PetRegisterModel,  db: Session = Depends(get_session)):
+async def register_pet( params: PetRegisterModel, request: Request, db: Session = Depends(get_session)):
 
     user = CreateUserSchema(
-        firstname=request.firstname, 
-        lastname=request.lastname, 
-        email=request.email,
-        state=request.state,
-        state_code=request.state_code,
-        city=request.city,
-        city_code=request.city_code,
-        street_address=request.street_address,
-        postal_code=request.postal_code,
-        phone_number=request.phone_number,
-        secondary_contact=request.secondary_contact,
-        secondary_contact_number=request.secondary_contact_number,
-        password=request.password,
-        passwordConfirm=request.confirm_password,
+        firstname=params.firstname, 
+        lastname=params.lastname, 
+        email=params.email,
+        state=params.state,
+        state_code=params.state_code,
+        city=params.city,
+        city_code=params.city_code,
+        street_address=params.street_address,
+        postal_code=params.postal_code,
+        phone_number=params.phone_number,
+        secondary_contact=params.secondary_contact,
+        secondary_contact_number=params.secondary_contact_number,
+        password=params.password,
+        passwordConfirm=params.confirm_password,
     )
     
     pet = UpdatePetSchema(
-        unique_id=request.unique_id,
-        microchip_id=request.microchip_id,
-        name=request.name,
-        breed=request.breed,
-        gender=request.gender,
-        pet_type_id=request.pet_type_id,
-        weight=request.weight,
-        color=request.color,
-        date_of_birth_month=request.date_of_birth_month,
-        date_of_birth_year=request.date_of_birth_year
+        unique_id=params.unique_id,
+        microchip_id=params.microchip_id,
+        name=params.name,
+        breed=params.breed,
+        gender=params.gender,
+        pet_type_id=params.pet_type_id,
+        weight=params.weight,
+        color=params.color,
+        date_of_birth_month=params.date_of_birth_month,
+        date_of_birth_year=params.date_of_birth_year
     )
 
     # return {"user": user, "pet": pet}
-    response = await pet_repo.register_pet_no_file(user, pet, db)
+    response = await pet_repo.register_pet_no_file(user, request, pet, db)
     return response
 
 @router.post('/register')
 async def register_pet(
+    request: Request,
     guid: str = Form(...),
     firstname: str = Form(...),
     lastname: str = Form(...),
@@ -197,7 +198,7 @@ async def register_pet(
     )
 
     # return {"user": user, "pet": pet}
-    response = await pet_repo.register_pet(user, pet, file, db)
+    response = await pet_repo.register_pet(user, pet, file, request, db)
     return response
 
 
@@ -235,6 +236,7 @@ async def update_pet_type(
         color= color,
         date_of_birth_month= date_of_birth_month,
         date_of_birth_year= date_of_birth_year,
+        owner_id=user_id,
         main_picture=file.filename if file else None
     )
     

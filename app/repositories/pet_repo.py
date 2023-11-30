@@ -13,10 +13,10 @@ from app.schemas.user_schema import CreateUserSchema, FilteredUserResponse
 from .. import models
 from ..schemas.pet_schema import FilteredPetResponse, PetBaseSchema, PetRegisterModel, PetResponse, ListPetResponse, CreatePetSchema, PetTypeResponse, UpdatePetSchema
 from sqlalchemy.orm import Session
-from fastapi import Depends, HTTPException, UploadFile, status, APIRouter, Response
+from fastapi import Depends, HTTPException, Request, UploadFile, status, APIRouter, Response
 from ..database import get_session
 from app.oauth2 import require_user
-from ..repositories import user_repo
+from ..repositories import user_repo, auth_repo
 
 router = APIRouter()
 
@@ -187,11 +187,14 @@ async def delete_pet(id: str, db: Session, user_id: str):
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-async def register_pet(user: CreateUserSchema, pet: UpdatePetSchema, file: UploadFile,  db: Session):
+async def register_pet(user: CreateUserSchema, pet: UpdatePetSchema, file: UploadFile, request: Request,  db: Session):
     
+    try:
+        new_user = await auth_repo.create_user(db, user)
+    except Exception as e:
+        raise e
     
     unique_filename = await cleanstr(file.filename)
-    new_user = await user_repo.add_user(db, user)
     
     
     pet_profile_path = os.path.join(USERDATA_DIR, str(new_user.id), str(pet.unique_id), "profile") 
@@ -217,9 +220,13 @@ async def register_pet(user: CreateUserSchema, pet: UpdatePetSchema, file: Uploa
     # return {'status': 'success', 'message': 'Verification token successfully sent to your email'}
     
     
-async def register_pet_no_file(user: CreateUserSchema, pet: UpdatePetSchema,  db: Session):
+async def register_pet_no_file(user: CreateUserSchema, request: Request, pet: UpdatePetSchema,  db: Session):
     
-    new_user = await user_repo.add_user(db, user)
+    
+    try:
+        new_user = await auth_repo.create_user(db, request, user)
+    except Exception as e:
+        raise e
     pet.owner_id = new_user.id
     updated_pet = await update_pet(pet.unique_id, pet, db)
         

@@ -35,6 +35,11 @@ class PetResponse(PetBaseSchema):
     created_at: datetime
     updated_at: datetime
 
+class PetResponse2(PetBaseSchema):
+    id: int
+    unique_id: UUID
+    created_at: datetime = None
+    updated_at: datetime = None
 
 class UpdatePetSchema(PetBaseSchema):
     unique_id: UUID
@@ -102,6 +107,6 @@ class PetTypeResponse(BaseModel):
         orm_mode = True
         
 class FilteredPetResponse(BaseModel):
-    pet: PetBaseSchema
+    pet: PetResponse2
     owner: PetDetailsUserResponse = None
     pet_type: PetTypeResponse = None
