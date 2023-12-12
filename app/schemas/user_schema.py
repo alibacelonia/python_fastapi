@@ -43,7 +43,7 @@ class CreateUserSchema(UserBaseSchema):
     otp_secret: str = None
     otp_created_at: datetime = None
     
-    status = str = 'active'
+    status: str = 'active'
 
 
 class UpdateUserSchema(BaseModel):
