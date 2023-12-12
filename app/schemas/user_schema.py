@@ -42,6 +42,8 @@ class CreateUserSchema(UserBaseSchema):
     otp: str = None
     otp_secret: str = None
     otp_created_at: datetime = None
+    
+    status = str = 'active'
 
 
 class UpdateUserSchema(BaseModel):
@@ -112,6 +114,8 @@ class UserResponse(UserBaseSchema):
     otp_created_at: datetime = None
     
     role: str = 'user'
+    
+    status: str = 'active'
     
     created_at: datetime
     updated_at: datetime

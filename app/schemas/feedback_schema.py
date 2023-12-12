@@ -9,6 +9,7 @@ class FeedbackBaseSchema(BaseModel):
     rate: int = None
     comment: str = None
     user_id: uuid.UUID | None = None
+    display_flag: bool = False
 
     class Config:
         orm_mode = True
@@ -23,19 +24,9 @@ class FeedbackResponse(FeedbackBaseSchema):
     rate: int
     comment: str
     user: FilteredUserResponse
+    display_flag : bool
     created_at: datetime
     updated_at: datetime
-
-
-class UpdateFeedbackSchema(BaseModel):
-    title: str | None = None
-    content: str | None = None
-    category: str | None = None
-    image: str | None = None
-    user_id: uuid.UUID | None = None
-
-    class Config:
-        orm_mode = True
 
 
 class ListFeedbackResponse(BaseModel):

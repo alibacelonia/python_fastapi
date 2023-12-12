@@ -46,7 +46,6 @@ async def create_user(payload: CreateUserSchema, request: Request, db: Session =
     #  Hash the password
     payload.password = utils.hash_password(payload.password)
     del payload.passwordConfirm
-    payload.role = 'user'
     payload.verified = False
     payload.email = EmailStr(payload.email.lower())
     
@@ -114,7 +113,7 @@ async def login(payload: LoginUserSchema, response: Response, db: Session = Depe
                         ACCESS_TOKEN_EXPIRES_IN * 60, '/', None, False, False, 'lax')
 
     # Send both access
-    return {'status': 'success', 'access_token': access_token}
+    return {'status': 'success', 'access_token': access_token, 'role': user.role}
 
 
 @router.get('/refresh')
@@ -147,7 +146,7 @@ async def refresh_token(response: Response, request: Request, Authorize: AuthJWT
                         ACCESS_TOKEN_EXPIRES_IN * 60, '/', None, False, True, 'lax')
     response.set_cookie('logged_in', 'True', ACCESS_TOKEN_EXPIRES_IN * 60,
                         ACCESS_TOKEN_EXPIRES_IN * 60, '/', None, False, False, 'lax')
-    return {'access_token': access_token}
+    return {'access_token': access_token, 'role': user.role}
 
 
 @router.get('/logout', status_code=status.HTTP_200_OK)

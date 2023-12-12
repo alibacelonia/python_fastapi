@@ -25,6 +25,11 @@ import os
 
 router = APIRouter()
 
+@router.get('/')
+async def get_users(db: Session = Depends(get_session), limit: int = 10, page: int = 1, search: str = '', filters: str = '', user_id: str = Depends(oauth2.require_user)):
+    response = await user_repo.get_users(db, limit, page, search, filters)
+    return response
+
 @router.get('/details')
 async def get_me(db: Session = Depends(get_session), user_id: str = Depends(oauth2.require_user)):
     try:

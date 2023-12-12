@@ -46,3 +46,4 @@ websockets==10.4
 twilio
 pyotp
 pycryptodome
+qrcode

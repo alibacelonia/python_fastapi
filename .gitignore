@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 sendgrid.env
 sendgrid.env
+userdata/

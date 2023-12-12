@@ -9,13 +9,17 @@ from fastapi import Depends, File, Form, HTTPException, Request, UploadFile, sta
 from ..database import get_session
 from app.oauth2 import require_user
 from ..repositories import pet_repo
+import qrcode
+from fastapi.responses import StreamingResponse
+from io import BytesIO, StringIO
+import zipfile
 
 router = APIRouter()
 
 
 @router.get('/')
-async def get_pets(db: Session = Depends(get_session), limit: int = 10, page: int = 1, search: str = ''):
-    response = await pet_repo.get_pets(db, limit, page, search)
+async def get_pets(db: Session = Depends(get_session), limit: int = 10, page: int = 1, search: str = '', filters: str = ''):
+    response = await pet_repo.get_pets(db, limit, page, search, filters)
     return response
 
 
@@ -201,8 +205,6 @@ async def register_pet(
     response = await pet_repo.register_pet(user, pet, file, request, db)
     return response
 
-
-
 # Update pet type by unique id
 @router.post('/update')
 async def update_pet_type(
@@ -244,3 +246,40 @@ async def update_pet_type(
     response = await pet_repo.update_my_pet_formdata(user_id, data, file, db)
     
     return response
+
+def generate_qr_code(data):
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data("https://secure-petz.info/"+str(data))
+    qr.make(fit=True)
+
+    # Generate QR code image
+    img = qr.make_image(fill_color="black", back_color="white")
+    img_bytes = BytesIO()
+    img.save(img_bytes)
+    img_bytes.seek(0)
+
+    return img_bytes
+
+@router.post('/generate_qr_zip')
+async def generate_qr_zip(data: list):
+    filtered_data = [item['unique_id'] for item in data]
+    
+    # return filtered_data
+    # Create a ZIP file in memory
+    zip_buffer = BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED, False) as zip_file:
+        for item in filtered_data:
+            # Generate QR code for each item and add it to the ZIP file
+            qr_code_bytes = generate_qr_code(item)
+            zip_file.writestr(f'qrcode_{item}.png', qr_code_bytes.read())
+
+    # Move to the beginning of the ZIP buffer
+    zip_buffer.seek(0)
+
+    # Return the ZIP file as a response
+    return StreamingResponse(zip_buffer, media_type="application/zip", headers={'Content-Disposition': 'attachment; filename=qr_codes.zip'})

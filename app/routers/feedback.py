@@ -2,7 +2,7 @@ import uuid
 
 from sqlalchemy import select
 
-from ..schemas.feedback_schema import FeedbackResponse, ListFeedbackResponse, CreateFeedbackSchema, UpdateFeedbackSchema
+from ..schemas.feedback_schema import FeedbackResponse, ListFeedbackResponse, CreateFeedbackSchema
 from .. import models
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, status, APIRouter, Response

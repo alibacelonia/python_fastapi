@@ -5,7 +5,7 @@ from typing import List
 import uuid
 
 from pydantic import EmailStr
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 
 from app import utils
 from app.email import Email
@@ -17,6 +17,7 @@ from fastapi import Depends, HTTPException, Request, UploadFile, status, APIRout
 from ..database import get_session
 from app.oauth2 import require_user
 from ..repositories import user_repo, auth_repo
+from sqlalchemy import or_, and_, inspect
 
 router = APIRouter()
 
@@ -24,17 +25,56 @@ router = APIRouter()
 USERDATA_DIR = os.path.join("app", "userdata")
 
 # get pets without authentication
-async def get_pets(db: Session, limit: int, page: int, search: str):
+async def get_pets(db: Session, limit: int, page: int, search: str = '', filters: str = ''):
     skip = (page - 1) * limit
+    
+    search_condition = (
+        or_(
+            or_(
+                and_(
+                    models.Pet.name.is_(None),  # NULL values
+                    search == "",  # Empty search term
+                ),
+                and_(
+                    models.Pet.breed.is_(None),  # NULL values
+                    search == "",  # Empty search term
+                )
+            ),
+            models.Pet.name.ilike(f"%{search}%"),  # Non-empty names matching the search term
+            models.Pet.breed.ilike(f"%{search}%"),  # Non-empty names matching the search term
+        )
+    )
+    
+    filter_items = filters.split(',') if filters else []
+    for item in filter_items:
+        if len(item.split('=')) >= 2:
+            key, value = item.split('=')
+            if key and value:
+                if key == 'qr':
+                    if value.lower() == "not-used":
+                        search_condition = and_(search_condition, models.Pet.owner_id.is_(None))
+                    elif value.lower() == "used":
+                        search_condition = and_(search_condition, models.Pet.owner_id.is_not(None))
 
+
+    total_items = await db.scalar(
+        select(func.count())
+        .select_from(models.Pet)
+        .filter(search_condition)
+    )
+    
+    total_pages = -(-total_items // limit)
+    
     query = await db.execute(
             select(models.Pet)
+            .filter(search_condition)
             .group_by(models.Pet.id)
+            .order_by(models.Pet.id.asc())  # Order by id
             .limit(limit)
             .offset(skip)
         )
     pets = query.scalars().all()
-    return {'status': 'success', 'results': len(pets), 'pets': pets}
+    return {'status': 'success', 'results': len(pets), 'total_pages': total_pages, 'total_items':total_items, 'pets': pets}
 
 # get pets with authentication
 async def get_my_all_pets(db: Session, user_id: str):
@@ -190,7 +230,7 @@ async def delete_pet(id: str, db: Session, user_id: str):
 async def register_pet(user: CreateUserSchema, pet: UpdatePetSchema, file: UploadFile, request: Request,  db: Session):
     
     try:
-        new_user = await auth_repo.create_user(db, user)
+        new_user = await auth_repo.create_user(db, request, user)
     except Exception as e:
         raise e
     

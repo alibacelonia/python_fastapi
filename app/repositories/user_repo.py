@@ -1,7 +1,8 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from psycopg2 import IntegrityError
 from pydantic import EmailStr
-from sqlalchemy import or_, select
+from sqlalchemy import and_, func, or_, select
 
 from app import utils
 from app.email import Email
@@ -22,6 +23,70 @@ router = APIRouter()
 
 australia_timezone = pytz.timezone('Australia/Sydney')
 philippines_timezone = pytz.timezone('Asia/Manila')
+
+
+async def get_users(db: Session, limit: int, page: int, search: str = '', filters: str = ''):
+    skip = (page - 1) * limit
+    
+    search_condition = (
+        or_(
+            or_(
+                and_(
+                    models.User.firstname.is_(None),  # NULL values
+                    search == "",  # Empty search term
+                ),
+                and_(
+                    models.User.lastname.is_(None),  # NULL values
+                    search == "",  # Empty search term
+                )
+            ),
+            models.User.firstname.ilike(f"%{search}%"),  # Non-empty names matching the search term
+            models.User.lastname.ilike(f"%{search}%"),  # Non-empty names matching the search term
+        )
+    )
+    
+    filter_items = filters.split(',') if filters else []
+    for item in filter_items:
+        if len(item.split('=')) >= 2:
+            key, value = item.split('=')
+            if key and value:
+                if key == 'status':
+                    if value.lower() == "active":
+                        search_condition = and_(search_condition, models.User.status == 'active')
+                    elif value.lower() == "deactivated":
+                        search_condition = and_(search_condition, models.User.status == 'deactivated')
+                
+                if key == 'email':
+                    if value.lower() == "verified":
+                        search_condition = and_(search_condition, models.User.verified == True)
+                    elif value.lower() == "not-verified":
+                        search_condition = and_(search_condition, models.User.verified == False)
+
+
+    total_items = await db.scalar(
+        select(func.count())
+        .select_from(models.User)
+        .where(models.User.role == 'user')
+        .filter(search_condition)
+    )
+    
+    total_pages = -(-total_items // limit)
+    
+    query = await db.execute(
+            select(models.User)
+            .where(models.User.role == 'user')
+            .filter(search_condition)
+            .group_by(models.User.id)
+            .order_by(models.User.id.asc())  # Order by id
+            .limit(limit)
+            .offset(skip)
+        )
+    users: List[models.User] = query.scalars().all()
+    
+    user_responses = [UserResponse(**user.to_dict()) for user in users]
+    
+    return {'status': 'success', 'results': len(users), 'total_pages': total_pages, 'total_items':total_items, 'users': user_responses}
+
 
 async def get_user_details(user_id: str, db: Session):
     try:

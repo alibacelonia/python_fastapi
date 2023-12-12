@@ -44,8 +44,11 @@ class User(Base):
     otp_secret = Column(String, nullable=True)
     otp_created_at = Column(TIMESTAMP(timezone=True),nullable=True)
     
+    status = Column(String, nullable=True, server_default='active')
+    
     created_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text("now()"))
     updated_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text("now()"))
+    
     
     pets = relationship('Pet', back_populates='owner', uselist=True)
 
@@ -66,7 +69,7 @@ class User(Base):
 class PetType(Base):
     __tablename__ = 'pet_type'
     
-    type_id = Column(Integer, primary_key=True, unique=True)
+    type_id = Column(Integer, primary_key=True)
     type = Column(String, nullable=False, unique=True)
     created_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text("now()"))
     updated_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text("now()"))
@@ -133,6 +136,7 @@ class Feedback(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     rate = Column(Integer, nullable=False)
     comment = Column(String, nullable=False)
+    display_flag = Column(Boolean, nullable=False, default=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
     user = relationship('User')
