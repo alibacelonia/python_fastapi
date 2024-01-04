@@ -1,8 +1,9 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from psycopg2 import IntegrityError
 from pydantic import EmailStr
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import Column, DateTime, MetaData, String, Table, and_, delete, func, or_, select
 
 from app import utils
 from app.email import Email
@@ -17,6 +18,8 @@ import pyotp
 from twilio.rest import Client
 from datetime import datetime, timedelta
 import pytz
+import secrets
+
 
 router = APIRouter()
 
@@ -24,6 +27,50 @@ router = APIRouter()
 australia_timezone = pytz.timezone('Australia/Sydney')
 philippines_timezone = pytz.timezone('Asia/Manila')
 
+async def create_reset_token(db, email: str):
+    # Generate a unique token
+    token = secrets.token_urlsafe(32)
+
+    # Set expiration time (e.g., 1 hour from now)
+    expiration_time = datetime.utcnow() + timedelta(minutes=10)
+
+    # Store the token in the database
+    # query = models.ResetToken.insert().values(token=token, email=email, expires_at=expiration_time)
+    reset_token = models.ResetToken(token=token, email=email, expires_at=expiration_time)
+    db.add(reset_token)
+    await db.commit()
+    await db.refresh(reset_token)
+    return token
+    
+async def confirm_password_reset(db: Session, reset_token: str, new_password: str):
+    # Check if the reset token exists and is not expired
+    # reset_token_obj = db.query(models.ResetToken).filter_by(token=reset_token).first()
+    
+    token_result = await db.execute(select(models.ResetToken).filter_by(token=reset_token).order_by(models.ResetToken.expires_at.desc()))
+    reset_token_obj = token_result.scalar_one_or_none()
+
+    if not reset_token_obj or reset_token_obj.expires_at < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="Invalid or expired reset link.")
+
+    # Reset the password (update it in the database or authentication system)
+    # user = db.query(models.User).filter_by(email=reset_token_obj.email).first()
+    user_result = await db.execute(select(models.User).filter_by(email=reset_token_obj.email))
+    user = user_result.scalar_one_or_none()
+
+    if user:
+        # Update the user's password (replace this with your actual password update logic)
+        user.password = utils.hash_password(new_password)
+
+        # Remove the reset token from the database
+        # db.delete(reset_token_obj)
+
+        # Commit the changes to the database
+        await db.execute(delete(models.ResetToken).where(models.ResetToken.email == user.email))
+        await db.commit()
+
+        return {"message": "Password reset successful"}
+
+    raise HTTPException(status_code=404, detail="User not found")
 
 async def get_users(db: Session, limit: int, page: int, search: str = '', filters: str = ''):
     skip = (page - 1) * limit
@@ -138,6 +185,21 @@ async def check_email(email: str, db: Session):
                 raise HTTPException(status_code=409,
                                     detail='Email is already in use.')
         return {'details' : 'OK'}
+    
+    except TimeoutError:
+        raise HTTPException(status_code=500, detail="Task timed out")
+
+async def check_email_for_pwreset(email: str, db: Session):
+    try:
+        query = await db.execute(
+            select(models.User).where(models.User.email == email)
+        )
+        user = query.scalar_one_or_none()
+        
+        if not user:
+                raise HTTPException(status_code=404,
+                                    detail='Email not found.')
+        return user
     
     except TimeoutError:
         raise HTTPException(status_code=500, detail="Task timed out")

@@ -69,7 +69,7 @@ async def get_pets(db: Session, limit: int, page: int, search: str = '', filters
             select(models.Pet)
             .filter(search_condition)
             .group_by(models.Pet.id)
-            .order_by(models.Pet.id.asc())  # Order by id
+            .order_by(models.Pet.created_at.desc())  # Order by id
             .limit(limit)
             .offset(skip)
         )

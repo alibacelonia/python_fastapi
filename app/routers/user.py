@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
+from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy import Column, DateTime, MetaData, String, Table
 from app.email import Email
 
 from app.schemas.pet_schema import UpdatePetSchema
@@ -22,6 +24,9 @@ from cryptography.hazmat.primitives.padding import PKCS7
 from cryptography.hazmat.backends import default_backend
 from base64 import b64encode
 import os
+
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 router = APIRouter()
 
@@ -118,3 +123,37 @@ async def reset_otp(db: Session = Depends(get_session), user_id: str = Depends(o
 async def verify_otp(db: Session = Depends(get_session), user_id: str = Depends(oauth2.require_user)):
     response = await user_repo.get_remaining_time(db, user_id)
     return response
+
+
+@router.post("/reset-password")
+async def reset_password(email: str = Form(...), db: Session = Depends(get_session)):
+    try:
+        # You would typically validate the email here
+        # For simplicity, let's assume the email is valid
+        user = await user_repo.check_email_for_pwreset(email, db)
+        # Create a reset token and send it to the user (e.g., via email)
+        reset_token = await user_repo.create_reset_token(db, email)
+        # You would usually send the reset token to the user via email here
+        try:
+            url = f"http://localhost:3000/change-password/{reset_token}"
+            await Email(user, url, [email.lower()]).sendResetLink()
+        except Exception as error:
+            print('Error', error)
+            await db.commit()
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail='There was an error sending email')
+        return {"message": "Password reset link sent"}
+    
+    except HTTPException:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Email address not found.")
+    except:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Connection timed out.")
+
+@router.post("/reset-password/{reset_token}")
+async def reset_password_confirm(
+    reset_token: str ,
+    new_password: str = Form(...),
+    db: Session = Depends(get_session)
+):
+    token = await user_repo.confirm_password_reset(db, reset_token, new_password)
+    return token

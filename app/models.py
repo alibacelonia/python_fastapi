@@ -78,7 +78,7 @@ class Pet(Base):
     __tablename__ = 'pets'
 
     id = Column(Integer, primary_key=True)
-    unique_id = Column(UUID(as_uuid=True), default=uuid.uuid4, unique=False, nullable=False)
+    unique_id = Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False)
 
     microchip_id = Column(String, unique=False, nullable=True, index=True)
     name = Column(String, nullable=True, index=True)
@@ -95,8 +95,11 @@ class Pet(Base):
 
     owner_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=True)
     
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=True)
-    updated_at = Column(DateTime, default=datetime.utcnow, nullable=True)
+    created_at = Column(TIMESTAMP(timezone=True),nullable=True, server_default=text("now()"))
+    created_by = Column(String, nullable=True)
+    updated_at = Column(TIMESTAMP(timezone=True),nullable=True, server_default=text("now()"))
+    updated_by = Column(String, nullable=True)
+    
 
     pet_type = relationship('PetType')
     owner = relationship('User', back_populates='pets')
@@ -152,3 +155,9 @@ class UserSettings(Base):
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
     user = relationship('User')
+    
+class ResetToken(Base):
+    __tablename__ = "reset_tokens"
+    token = Column(String, primary_key=True, index=True)
+    email = Column(String)
+    expires_at = Column(DateTime)

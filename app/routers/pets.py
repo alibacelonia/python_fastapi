@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional
 import uuid
 
@@ -5,7 +6,7 @@ from app.schemas.user_schema import CreateUserSchema
 from .. import models
 from ..schemas.pet_schema import PetBaseSchema, PetRegisterModel, PetResponse, ListPetResponse, CreatePetSchema, PetTypeResponse, UpdatePetSchema
 from sqlalchemy.orm import Session
-from fastapi import Depends, File, Form, HTTPException, Request, UploadFile, status, APIRouter, Response
+from fastapi import Depends, File, Form, HTTPException, Query, Request, UploadFile, status, APIRouter, Response
 from ..database import get_session
 from app.oauth2 import require_user
 from ..repositories import pet_repo
@@ -188,7 +189,7 @@ async def register_pet(
     pet = UpdatePetSchema(
         unique_id=guid,
         behavior= behavior,  # Include the new fields here
-        description= None if description == "null" else description,
+        description= None if description == "None" else description,
         weight= weight,
         pet_type_id= pet_type_id,
         gender= gender,
@@ -228,7 +229,7 @@ async def update_pet_type(
     data = UpdatePetSchema(
         unique_id=guid,
         behavior= behavior,  # Include the new fields here
-        description= None if description == "null" else description,
+        description= None if description == "None" else description,
         weight= weight,
         pet_type_id= pet_type_id,
         gender= gender,
@@ -283,3 +284,30 @@ async def generate_qr_zip(data: list):
 
     # Return the ZIP file as a response
     return StreamingResponse(zip_buffer, media_type="application/zip", headers={'Content-Disposition': 'attachment; filename=qr_codes.zip'})
+
+@router.post('/generate-records')
+async def generate_records(num_records: int = Query(..., title="Number of Records", ge=1, le=1000), db: Session = Depends(get_session), user_id: str = Depends(require_user)):
+    generated_pets = []
+    for _ in range(num_records):
+        pet_data = {
+            "microchip_id": None,
+            "name": None,
+            "description": None,
+            "behavior": None,
+            "weight": None,
+            "gender": None,
+            "color": None,
+            "pet_type_id": None,
+            "main_picture": None,
+            "breed": None,
+            "date_of_birth_month": None,
+            "date_of_birth_year": None,
+            "owner_id": None
+        }
+
+        pet = models.Pet(**pet_data, created_at=datetime.utcnow(), created_by=user_id, updated_at=datetime.utcnow())
+        db.add(pet)
+        generated_pets.append(pet)
+
+    await db.commit()
+    return generated_pets

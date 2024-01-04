@@ -35,7 +35,8 @@ async def create_user(payload: CreateUserSchema, request: Request, db: Session =
         )
     )
 )
-    user = user_query.scalar_one_or_none()
+    user = user_query.first()
+    
     if user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                             detail='Account already exist')

@@ -62,3 +62,6 @@ class Email:
         
     async def sendOTP(self):
         await self.sendMail(subject='One-Time Password Code', template='otp', first_name=self.name, otp_code=self.otp_code)
+        
+    async def sendResetLink(self):
+        await self.sendMail(subject='Password Reset Request', template='reset_password', url=self.url, first_name=self.name)
