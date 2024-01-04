@@ -259,7 +259,8 @@ def generate_qr_code(data):
     qr.make(fit=True)
 
     # Generate QR code image
-    img = qr.make_image(fill_color="black", back_color="white")
+    img = qr.make_image(fill_color=(13,103,181), back_color=(255,255,255))
+    # img = img.resize((1318, 1318))
     img_bytes = BytesIO()
     img.save(img_bytes)
     img_bytes.seek(0)
@@ -267,7 +268,7 @@ def generate_qr_code(data):
     return img_bytes
 
 @router.post('/generate_qr_zip')
-async def generate_qr_zip(data: list):
+async def generate_qr_zip(data: list, user_id: str = Depends(require_user)):
     filtered_data = [item['unique_id'] for item in data]
     
     # return filtered_data
@@ -311,3 +312,29 @@ async def generate_records(num_records: int = Query(..., title="Number of Record
 
     await db.commit()
     return generated_pets
+
+
+@router.post('/generate-qr-all')
+async def generate_qr_zip(db: Session = Depends(get_session), user_id: str = Depends(require_user)):
+    filtered_data = await pet_repo.get_all_pets(db)
+    # return filtered_data
+    # Create a ZIP file in memory
+    zip_buffer = BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED, False) as zip_file:
+        for item in filtered_data:
+            # Generate QR code for each item and add it to the ZIP file
+            qr_code_bytes = generate_qr_code(item)
+            zip_file.writestr(f'qrcode_{item}.png', qr_code_bytes.read())
+            
+        csv_data = "\n".join([f"{x+1},https://secure-petz.info/{str(item)}" for x, item in enumerate(filtered_data)])
+        zip_file.writestr('pets_data.csv', csv_data)
+
+    # Move to the beginning of the ZIP buffer
+    zip_buffer.seek(0)
+
+    # Return the ZIP file as a response
+    return StreamingResponse(zip_buffer, media_type="application/zip", headers={'Content-Disposition': 'attachment; filename=qr_codes.zip'})
+
+
+
+

@@ -24,6 +24,17 @@ router = APIRouter()
 
 USERDATA_DIR = os.path.join("app", "userdata")
 
+
+async def get_all_pets(db: Session):
+    query = await db.execute(
+            select(models.Pet.unique_id)
+            .group_by(models.Pet.unique_id)
+            .order_by(models.Pet.unique_id.desc())  # Order by id
+        )
+    pets = query.scalars().all()
+    return pets
+
+
 # get pets without authentication
 async def get_pets(db: Session, limit: int, page: int, search: str = '', filters: str = ''):
     skip = (page - 1) * limit
