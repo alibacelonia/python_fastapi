@@ -167,7 +167,8 @@ async def get_user_details(user_id: str, db: Session):
             email=user.email,
             password=user.password,
             created_at=user.created_at,
-            updated_at=user.updated_at
+            updated_at=user.updated_at,
+            settings=user.settings
         )
         return user_response
     

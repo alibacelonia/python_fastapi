@@ -9,7 +9,7 @@ from sqlalchemy import func, select, update
 
 from app import utils
 from app.email import Email
-from app.schemas.user_schema import CreateUserSchema, FilteredUserResponse
+from app.schemas.user_schema import CreateUserSchema, FilteredUserResponse, UserResponse
 from .. import models
 from ..schemas.pet_schema import FilteredPetResponse, PetBaseSchema, PetRegisterModel, PetResponse, ListPetResponse, CreatePetSchema, PetTypeResponse, UpdatePetSchema
 from sqlalchemy.orm import Session
@@ -88,6 +88,16 @@ async def get_pets(db: Session, limit: int, page: int, search: str = '', filters
     return {'status': 'success', 'results': len(pets), 'total_pages': total_pages, 'total_items':total_items, 'pets': pets}
 
 # get pets with authentication
+async def get_pets_by_owner_id(owner_id: str, db: Session):
+    query = await db.execute(
+            select(models.Pet)
+            .group_by(models.Pet.id)
+            .where(models.Pet.owner_id == owner_id)
+    )
+    pets = query.scalars().all()
+    return {'status': 'success', 'results': len(pets), 'pets': pets}
+
+# get pets with authentication
 async def get_my_all_pets(db: Session, user_id: str):
     query = await db.execute(
             select(models.Pet)
@@ -114,21 +124,32 @@ async def create_pet(pet: CreatePetSchema, db: Session):
     return new_pet
 
 # update pet without authentication
+# async def update_pet(id: str, pet: UpdatePetSchema, db: Session):
+#     pet_query = await db.execute(
+#             select(models.Pet).where(models.Pet.unique_id == id)
+#         )
+#     selected_pet = pet_query.scalar_one_or_none()
+#     if not selected_pet:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+#                             detail=f'Pet not found')
+        
+#     if selected_pet is not None:
+#             for key, value in pet.dict(exclude_unset=True).items():
+#                 setattr(selected_pet, key, value)
+#             await db.commit()
+#     return selected_pet
 async def update_pet(id: str, pet: UpdatePetSchema, db: Session):
-    # pet_query = db.query(models.Pet).filter(models.Pet.unique_id == id)
-    # updated_pet = pet_query.first()
     pet_query = await db.execute(
-            select(models.Pet).where(models.Pet.unique_id == id)
-        )
+        select(models.Pet).where(models.Pet.unique_id == id)
+    )
     selected_pet = pet_query.scalar_one_or_none()
     if not selected_pet:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f'Pet not found')
-        
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Pet not found')
+
     if selected_pet is not None:
-            for key, value in pet.dict(exclude_unset=True).items():
-                setattr(selected_pet, key, value)
-            await db.commit()
+        for key, value in pet.dict(exclude_unset=True).items():
+            setattr(selected_pet, key, value)
+        await db.commit()
     return selected_pet
 
 # update pet with authentication
@@ -189,7 +210,6 @@ async def get_pet(id: str, db: Session):
         )
         result = await db.execute(query)
         pet, user, pet_type = result.first()
-        # return result.first()
         if not pet:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Pet not found')
         return FilteredPetResponse(pet=pet, owner=user, pet_type=pet_type)
@@ -197,7 +217,24 @@ async def get_pet(id: str, db: Session):
         # Log the exception or handle it appropriately
         raise HTTPException(status_code=404, detail="Pet not found")
     
+async def get_owner_details(id: str, db: Session):
+    try:
+        query = (
+            select(models.User)
+            .where(models.User.id == id)
+        )
+        result = await db.execute(query)
+        user = result.scalar_one_or_none()
+        # return result.first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'User not found')
+        return user
+    except Exception as e:
+        # Log the exception or handle it appropriately
+        raise HTTPException(status_code=404, detail="Pet not found")
+    
 async def check_pet(id: str, db: Session):
+    # async with db.begin():
     pet_query = await db.execute(
             select(models.Pet).where(models.Pet.unique_id == id)
         )
@@ -205,7 +242,22 @@ async def check_pet(id: str, db: Session):
     if not selected_pet:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'Pet not found')
-    return selected_pet
+    return PetBaseSchema.from_orm(selected_pet)
+
+async def check_pet_with_user(id: str, db: Session):
+    # async with db.begin():
+    query = (
+            select(models.Pet, models.User, models.PetType)
+            .join(models.User, models.Pet.owner_id == models.User.id, isouter=True)  # Use isouter=True for a left join
+            .join(models.PetType, models.Pet.pet_type_id == models.PetType.type_id, isouter=True)  # Add an outer join for PetType as well if needed
+            .where(models.Pet.unique_id == id)
+        )
+    result = await db.execute(query)
+    pet, user, pet_type = result.first()
+    if not pet:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'Pet not found')
+    return PetBaseSchema.from_orm(pet), user
 
 # get pets with authentication
 async def get_my_pet(id: str, user_id: str, db: Session,):
@@ -299,3 +351,18 @@ async def cleanstr(filename):
         return filename
     elif name_length > 8:
         return name[:8] + ext
+    
+    
+async def read_notification(id: str, db: Session):
+    pet_query = await db.execute(
+            select(models.Notification)
+            .where(models.Notification.to == id)
+            .where(models.Notification.is_read == False)
+        )
+    notifications = pet_query.scalars().all()
+    
+    for notification in notifications:
+        notification.is_read = True
+        
+        # Commit the session to persist the changes
+        await db.commit()

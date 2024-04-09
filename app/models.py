@@ -1,10 +1,11 @@
 import uuid
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import TIMESTAMP, Column, ForeignKey, String, Boolean, text, Float, Integer, DateTime
+from sqlalchemy import TIMESTAMP, Column, ForeignKey, String, Boolean, text, Float, Integer, DateTime, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
+import json
 
 Base = declarative_base()
 
@@ -48,7 +49,7 @@ class User(Base):
     
     created_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text("now()"))
     updated_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text("now()"))
-    
+    settings = Column(JSON, nullable=True)
     
     pets = relationship('Pet', back_populates='owner', uselist=True)
 
@@ -65,6 +66,17 @@ class User(Base):
             user_dict['otp_created_at'] = user_dict['otp_created_at'].isoformat() if user_dict['otp_created_at'] else None
 
             return user_dict
+        
+    def update_settings(self, settings_dict):
+        # Update settings field with a dictionary
+        self.settings = json.dumps(settings_dict)
+
+    def get_settings(self):
+        # Retrieve settings from JSON field and return as a dictionary
+        if self.settings:
+            return json.loads(self.settings)
+        else:
+            return {}
 
 class PetType(Base):
     __tablename__ = 'pet_type'
@@ -92,8 +104,14 @@ class Pet(Base):
     breed = Column(String, nullable=True)
     date_of_birth_month = Column(Integer, nullable=True)
     date_of_birth_year = Column(Integer, nullable=True)
+    
+    no_of_scans = Column(Integer, nullable=True)
 
     owner_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=True)
+    
+    allergies = Column(JSON, nullable=True)
+    medications = Column(JSON, nullable=True)
+    vaccines = Column(JSON, nullable=True)
     
     created_at = Column(TIMESTAMP(timezone=True),nullable=True, server_default=text("now()"))
     created_by = Column(String, nullable=True)
@@ -161,3 +179,62 @@ class ResetToken(Base):
     token = Column(String, primary_key=True, index=True)
     email = Column(String)
     expires_at = Column(DateTime)
+    
+class Fee(Base):
+    __tablename__ = "fees"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, nullable=False,default=uuid.uuid4)
+    fee_type = Column(String, nullable=True)
+    display_name = Column(String, nullable=True)
+    amount = Column(Float, nullable=True)
+    currency = Column(String, nullable=True)
+    operation = Column(String, nullable=True)
+    enabled = Column(Boolean, nullable=False, server_default='True')
+    
+    created_at = Column(TIMESTAMP(timezone=True),nullable=True, server_default=text("now()"))
+    created_by = Column(String, nullable=True)
+    updated_at = Column(TIMESTAMP(timezone=True),nullable=True, server_default=text("now()"))
+    updated_by = Column(String, nullable=True)
+    
+    
+class Product(Base):
+    __tablename__ = 'products'
+    
+    product_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    product_name = Column(String(255), nullable=False)
+    description = Column(String(255), nullable=True)
+    price = Column(Float, nullable=False)
+    currency = Column(String(10), nullable=False)
+    discount = Column(JSON, nullable=True)
+    freebies = Column(JSON, nullable=True)
+    category = Column(String(255), nullable=True)
+    manufacturer = Column(String(255), nullable=True)
+    image_url = Column(String(255), nullable=True)
+    image_urls = Column(JSON, nullable=True)
+    enabled = Column(Boolean, nullable=False, server_default='True')
+    
+    created_at = Column(TIMESTAMP(timezone=True),nullable=True, server_default=text("now()"))
+    created_by = Column(String, nullable=True)
+    updated_at = Column(TIMESTAMP(timezone=True),nullable=True, server_default=text("now()"))
+    updated_by = Column(String, nullable=True)
+    
+class ScanHistory(Base):
+    __tablename__ = "scan_history"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    qr_code_id = Column(String, index=True)
+    scanned_by = Column(String, server_default='Anonymous')
+    scan_time = Column(TIMESTAMP(timezone=True),nullable=True, server_default=text("now()"))
+    location = Column(String, nullable=True)
+    scan_result = Column(String, nullable=True)
+    device_info = Column(String, nullable=True)
+    ip_address = Column(String, nullable=True)
+    user_agent = Column(String, nullable=True)
+
+class Notification(Base):
+    __tablename__ = "notifications"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    to = Column(String, nullable=False)
+    message= Column(String, nullable=False)
+    created_at= Column(TIMESTAMP(timezone=True),nullable=True, server_default=text("now()"))
+    is_read = Column(Boolean, nullable=False, server_default='False')

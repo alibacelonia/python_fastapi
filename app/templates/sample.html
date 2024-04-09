@@ -1,0 +1,2637 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Play Pokemon Rise - Pokemon Rise - Free Pokemon MMORPG</title>
+        <script>
+            var version = '2.0.9';
+            var gameVersion = version;
+            var host_admin = "wss://www.pokemonrise.com:8081/game";
+            var map_admin = "/play/maps/";
+            var gameDirectory = "https://pokemonrise.com/play/";
+            Object.defineProperty(window, 'token', {
+                'value': '9d0196a81613f2aa99bffb239f063c1339e3d0b4f0f6cb0737a2d5ebab0401fb',
+                'writable': false
+            });
+            var versionCode = '2.0.9';
+            var mapTilesetResources = [];
+        </script>
+        <!-- Twitter -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:title" content="Play Pokemon Rise - Pokemon Rise - Free Pokemon MMORPG">
+        <meta name="twitter:description" content="Pokemon Rise is a free to play Pokemon MMORPG (massive multiplayer online role playing game) where you can battle and level up alongside your friends in real time.">
+        <meta name="twitter:image" content="/assets/img/social-logo.png">
+        <!-- Facebook -->
+        <meta property="og:url" content="https://pokemonrise.com/">
+        <meta property="og:title" content="Play Pokemon Rise - Pokemon Rise - Free Pokemon MMORPG">
+        <meta property="og:description" content="Pokemon Rise is a free to play Pokemon MMORPG (massive multiplayer online role playing game) where you can battle and level up alongside your friends in real time.">
+        <meta property="og:image" content="/assets/img/social.png">
+        <!-- Meta -->
+        <meta name="description" content="Pokemon Rise is a free to play Pokemon MMORPG (massive multiplayer online role playing game) where you can battle and level up alongside your friends in real time.">
+        <meta name="author" content="Pokemon Rise.">
+        <link rel="shortcut icon" href="/favicon.ico">
+        <link href="https://fonts.googleapis.com/css?family=Viga" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.0/howler.min.js" integrity="sha512-ALoawPS0JxHQ+8dGL7htZIlVNRaE/SN9gHD4G8pJJTi9H4BQ/3PjdvhggSGR34g00mvTPFkxQuveQUsJA5664Q==" crossorigin="anonymous"></script>
+        <link rel="stylesheet" type="text/css" href="/play/css/production.min.css"/>
+        <script type="text/javascript">
+            // var console = {};
+            // console.log = function(){};
+        </script>
+        <script type="text/javascript" src="/play/js/production.min.js?v=2.0.9"></script>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+        <!-- For iOS web apps -->
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <meta name="apple-mobile-web-app-title" content="Pokemon Rise">
+        <link rel="apple-touch-icon" href="/assets/img/appicon.png">
+        <!-- For iOS web apps -->
+        <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover, user-scalable=no">
+    </head>
+    <body style="overflow: hidden;user-select: none;" oncontextmenu="return false;">
+        <div class="team" id="team"></div>
+        <canvas id='game'></canvas>
+        <div class="minimap" style="display: none;">
+            <canvas id="minimap"></canvas>
+        </div>
+        <div id="bosses"></div>
+        <div id="chatBox" style="display: none;">
+            <div class="chat-heading">
+                <ul class="chat-tabs chat-tabs__grow">
+                    <li class="chat-tab active">
+                        <a href="#" class="chat-tab__link chat-tab__link-tab" id="roomglobal" data-id="1" data-toggle="global">Global</a>
+                    </li>
+                    <li class="chat-tab">
+                        <a href="#" class="chat-tab__link chat-tab__link-tab" id="roombattle" data-id="B" data-toggle="battle">Battle</a>
+                    </li>
+                    <li class="chat-tab">
+                        <a href="#" class="chat-tab__link chat-tab__link-tab" id="roomtrades" data-id="3" data-toggle="trades">Trades</a>
+                    </li>
+                    <li class="chat-tab">
+                        <a href="#" class="chat-tab__link chat-tab__link-tab" id="roomguild" data-id="P" data-toggle="guild">Guild</a>
+                    </li>
+                </ul>
+                <ul class="chat-tabs">
+                    <li class="chat-tab">
+                        <a href="https://discord.gg/A4WZ6Gh" id="roomdiscord" target="_blank" class="chat-tab__link">Discord</a>
+                    </li>
+                    <li class="chat-tab">
+                        <a href="#" class="chat-tab__link chat-minimize">Hide</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="chat-wrapper show">
+                <div class="chat-container">
+                    <div class="chat-room chat-global" id="chat-1" data-id="1" style="display: block;"></div>
+                    <div class="chat-room chat-battle" id="chat-B" data-id="B"></div>
+                    <div class="chat-room chat-trades" id="chat-3" data-id="3"></div>
+                    <div class="chat-room chat-guild" id="chat-P" data-id="P"></div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" class="block chat-input__box" placeholder="Press enter to chat" autocomplete="off" name="chatInput" id="chatInput" onkeyup="ChatPressKey(event, false, '');"/>
+                </div>
+            </div>
+        </div>
+        <!--<div id="chats" style="display: none!important;">
+            <div class='dialogTitle'>
+                <div class='dialogTitleLabel'>
+                    <div class="dialogRoom roomSelected" id="roomglobal" onclick='ChatroomsSelect(1, this);'>Global</div>
+                    <div class="dialogRoom" id="roombattle" onclick="ChatroomsSelect('B', this);">Battle</div>
+                    <div class="dialogRoom" id="roomguild" onclick="ChatroomsSelect('P', this);">Guild</div>
+                    <div class="dialogRoom" id="roomtrades" onclick='ChatroomsSelect(3, this);'>Trades</div>
+                    <div class="dialogRoom" onclick='ChatroomsSelect(5,this);'>Spanish</div>
+                    <div class="dialogRoom" id="roomauction" onclick='ChatroomsSelect(6, this);'>Auction</div>
+                    <div class="dialogRoom discord" id="roomdiscord"><a href="https://discord.gg/A4WZ6Gh" target="_blank">Discord <i style="position: relative; top: 1px;" class="fas fa-external-link-square-alt"></i></a></div>
+                </div>
+                <div class='dialogToggle'><i id='chatMaximize'  onclick='toggleMaxChat()' style="padding-right: 3px;" class="fas fa-caret-square-up fa-2"></i>&nbsp;<i id='chatIcon'  onclick='toggleChat()' class="fas fa-caret-down fa-2"></i></div>
+            </div>
+            <div class='chatContents'>
+                <div class='chatscroll' id='chat_1'></div>
+                <div class='chatscroll' id='chat_B' style='display:none;'></div>
+                <div class='chatscroll' id='chat_P' style='display:none;'></div>
+                <div class='chatscroll' id='chat_3' style='display:none;'></div>
+                <div class='chatscroll' id='chat_5' style='display:none;'></div>
+                <div class='chatscroll' id='chat_6' style='display:none;'></div>
+                <div class='chatscroll' id='chat_7' style='display:none;'></div>
+                <input type="text" placeholder="Press enter to send a message." class="chatinput" name="chatInput" id="chatInput" autocomplete="off" onkeyup="ChatPressKey(event, false, '');">
+            </div>
+        </div>-->
+        <div id="stuff">
+            <span class="scanner_icon">
+                <img src="/play/images/menu/scanner.png" onclick="findWildPokemon();"/>
+            </span>
+            <div id="auctions" class="dialogPanel ui-draggable" style="display: none; position: absolute; left: 10px; top: 10px; width: 180px; height: auto; opacity: 1;">
+                <div class="dialogTitle">
+                    <div class="dialogTitleLabel">Auctions</div>
+                    <div class="dialogToggle">
+                        <i id="chatIcon" onclick="dialogAuctionsHide();" class="fa fa-times fa-2"></i>
+                    </div>
+                </div>
+                <div id="auctionsContents" style="background-color: rgba(51, 51, 51); height: auto;" class="clearfix">
+                    <div class="flex">
+                        <!-- <div class="auction_sidebar">
+                            Sidebar
+                        </div> -->
+                        <div class="auction_content">
+                            <div class="clearfix" style="margin-bottom: 8px;">
+                                <div class="pull-right">
+                                    <button onclick="dialogCreateAuction()" class="green-btn btn-sm">Create Auction</button>
+                                </div>
+                            </div>
+                            <div id="auction_listings">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="guild" class="dialogPanel ui-draggable" style="display:none;position: absolute; left: 10px; top: 10px; width: 180px; height: auto; opacity: 1;">
+                <div class="dialogTitle">
+                    <div class="dialogTitleLabel ui-draggable-handle">Manage Guild</div>
+                    <div class="dialogToggle">
+                        <i id="chatIcon" onclick="dialogGuildHide();" class="fa fa-times fa-2"></i>
+                    </div>
+                </div>
+                <div id="riseStoreContents" style="background-color: rgb(51, 51, 51); height: auto; " class="clearfix">
+                    <div id='guild-menu'>
+                        <p id='guild-label' style='color:#fff;font-size: 12px;text-align:center; display: block; padding: 5px 0;'>You are presently not in a Guild.</p>
+                        <div class="saleItem" id='guild-create'>
+                            <div class="clearfix heading">
+                                <div style="float: left;">
+                                    <img src="/play/images/items/rule-book.png">
+                                </div>
+                                <h4>Create a Guild</h4>
+                            </div>
+                            <p>
+                                Create a Guild set the Name and Description. Guilds are necessary to challenge town Gyms. Please note that it will cost <strong>$10,000</strong>
+                                to form a new guild.
+                            </p>
+                            <div class='clearfix'>
+                                <button class="button button-grey pull-right" onclick='btnGuildCreate();'>Create Guild</button>
+                            </div>
+                        </div>
+                        <div class="saleItem" id='guild-update'>
+                            <div class="clearfix heading">
+                                <div style="float: left;">
+                                    <img src="/play/images/items/rule-book.png">
+                                </div>
+                                <h4>Update your Guild</h4>
+                            </div>
+                            <p>Update guild description, name and color.</p>
+                            <div class='clearfix'>
+                                <button class="button button-grey pull-right" onclick='btnGuildUpdate();'>Manage Guild</button>
+                            </div>
+                        </div>
+                        <div class="saleItem" id='guild-members'>
+                            <div class="clearfix heading">
+                                <div style="float: left;">
+                                    <img src="/play/images/items/card-key.png">
+                                </div>
+                                <h4>Manage Guild Members</h4>
+                            </div>
+                            <p>Manage guild member and their ranks.</p>
+                            <div class='clearfix'>
+                                <button class="button button-grey pull-right" onclick='btnGuildShowMembers();'>Manage Members</button>
+                            </div>
+                        </div>
+                        <div class="saleItem" id='guild-gyms'>
+                            <div class="clearfix heading">
+                                <div style="float: left;">
+                                    <img src="/play/images/items/machine-part.png">
+                                </div>
+                                <h4>View Guild Gyms</h4>
+                            </div>
+                            <p>View Gyms your guild currently owns.</p>
+                            <div class='clearfix'>
+                                <button class="button button-grey pull-right" onclick="btnGuildShowGyms();">View Guild Gyms</button>
+                            </div>
+                        </div>
+                        <div class="saleItem" id='guild-events'>
+                            <div class="clearfix heading">
+                                <div style="float: left;">
+                                    <img src="/play/images/items/Sea Bell.png">
+                                </div>
+                                <h4>View Guild Events</h4>
+                            </div>
+                            <p>View the recent activity of the Guild.</p>
+                            <div class='clearfix'>
+                                <button class="button button-grey pull-right" onclick="btnGuildShowEvents();">View Guild Events</button>
+                            </div>
+                        </div>
+                        <div class="saleItem" id='guild-bank'>
+                            <div class="clearfix heading">
+                                <div style="float: left;">
+                                    <img src="/play/images/items/relic-gold.png">
+                                </div>
+                                <h4>Manage Guild Bank</h4>
+                            </div>
+                            <p>Manage the Guild Money and Level.</p>
+                            <div class='clearfix'>
+                                <button class="button button-grey pull-right" onclick="btnGuildShowBank();">Manage Guild Bank</button>
+                            </div>
+                        </div>
+                        <div class="saleItem" id='guild-invites'>
+                            <h4>View Guild Invites</h4>
+                            <p>View any Guild Invitations that have been sent to you.</p>
+                            <div class='clearfix'>
+                                <button class="button button-grey pull-right" onclick="btnGuildShowInvites();">View Guild Invites</button>
+                            </div>
+                        </div>
+                        <div class="saleItem" id='guild-leave'>
+                            <h4>Leave Guild</h4>
+                            <p>Leave the Guild you are presently in.</p>
+                            <div class='clearfix'>
+                                <button class="button button-grey pull-right" onclick="btnGuildLeave();">Leave Guild</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id='manage-guild' class="manage-guild-form" style='display:none;'>
+                        <p class='form-heading' id='manage-greate-guild-label'>Change Guild Details</p>
+                        <div class='form-group'>
+                            <label style="color: #FFF;">Guild Name</label>
+                            <input class='form-control' id='guild_name' type='text' placeholder='Guild Name' value=''/>
+                        </div>
+                        <div class="form-group guild-tag" style="display: none;">
+                            <label>
+                                Guild Tag <small>(Max 4 characters, inappropriate tags will be removed)</small>
+                            </label>
+                            <input class="form-control" id="guild_tag" type="text" placeholder="Guild Tag" value='' maxlength="4"/>
+                        </div>
+                        <div class='form-group'>
+                            <label>
+                                Guild Description <small>(Max 500 characters)</small>
+                            </label>
+                            <textarea class='form-control' id='guild_description' type='text' placeholder='Description' style='height: 100px;'></textarea>
+                        </div>
+                        <div class='form-group'>
+                            <label>Guild Color</label>
+                            <input class='color-picker' id='guild_color' type='text' value='#999'/>
+                        </div>
+                        <div class='form-group'>
+                            <button id='btnCreate' class='button button-grey pull-right' onclick='createUpdateGuild();'>Create Guild</button>
+                            <div class="pull-left">
+                                <button id="" class="button button-grey pull-left" style="margin-right: 5px;" onclick="dialogGuild();">Back</button>
+                                <button id='btnRemoveGuild' class='button button-grey pull-left' onclick='disbandGuild();'>Disband Guild</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id='guild-members-list' style='display:none;'>
+                        <p class='form-heading' id='manage-greate-guild-label'>Guild Members</p>
+                        <div class='guild-member-listing'></div>
+                        <div class='form-group clearfix'>
+                            <button id='' class='button button-grey pull-left' onclick='dialogGuild();'>Back</button>
+                            <div class="pull-right">
+                                <input class="" id="guildInvite" value="" playerholder="Username">
+                                <button id="btnCreate" class="button button-grey " onclick="guildSendInvite();">Invite Trainer</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id='guild-bank-list' style='display:none;'>
+                        <div class='guild-bank-listing'></div>
+                        <div class='form-group saleItem'>
+                            <h4 id='guild-balance'>Guild Balance: </h4>
+                        </div>
+                        <div class='form-group saleItem'>
+                            <h4>Give to the Guild</h4>
+                            <input class="" id="guildMoneyTransfer" value="0" playerholder="100" style='width: 80px;'>
+                            <button id='btnCreate' class='button button-grey' onclick='guildTransferMoney();'>Transfer to Guild</button>
+                        </div>
+                        <div class='form-group saleItem' id='guild-leader-bank-give'>
+                            <h4>Give to a Guild Member</h4>
+                            <input class="" id="guildMoney" value="0" playerholder="100" style='width: 80px;'>
+                            <select id="guildMembersGive"></select>
+                            <button id='btnCreate' class='button button-grey' onclick='guildTransferMoneyMember();'>Transfer to Member</button>
+                        </div>
+                        <div class='form-group saleItem' id='guild-leader-bank-give'>
+                            <h4>
+                                Guild Level <span class="current-level"></span>
+                            </h4>
+                            <table class="guild-upgrade">
+                                <tr>
+                                    <td>
+                                        <strong>Current Level:</strong>
+                                        <ul id='guild-level-current'></ul>
+                                    </td>
+                                    <td>
+                                        <strong>Next Level:</strong>
+                                        <ul id='guild-level-next'></ul>
+                                        <button id='btnGuildUpgrade' class='button button-grey pull-right' onclick='guildUpgrade();'>Upgrade</button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class='form-group clearfix'>
+                            <button id='' class='button button-grey pull-right' onclick='dialogGuild();'>Back</button>
+                        </div>
+                    </div>
+                    <div id='guild-events-list' style='display:none;'>
+                        <p class='form-heading' id='manage-greate-guild-label'>Recent Guild Events</p>
+                        <div class='guild-events-listing'></div>
+                        <div class='form-group clearfix'>
+                            <button id='' class='button button-grey pull-right' onclick='dialogGuild();'>Back</button>
+                        </div>
+                    </div>
+                    <div id='guild-gyms-list' style='display:none;'>
+                        <p class='form-heading' id='manage-greate-guild-label'>Guild Gyms</p>
+                        <div class='guild-gyms-listing'></div>
+                        <div class='form-group clearfix'>
+                            <button id='' class='button button-grey pull-right' onclick='dialogGuild();'>Back</button>
+                        </div>
+                    </div>
+                    <div id='guild-invites-list' style='display:none;'>
+                        <p class='form-heading' id='manage-greate-guild-label'>Guild Invites</p>
+                        <div class='guild-invites-listing'></div>
+                        <div class='form-group clearfix'>
+                            <button id='' class='button button-grey pull-right' onclick='dialogGuild();'>Back</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="goldStore" class="dialogPanel ui-draggable" style="display: none; position: absolute; left: 10px; top: 10px; width: 180px; height: 410px; opacity:1;">
+                <div class="dialogTitle">
+                    <div class="dialogTitleLabel ui-draggable-handle">Gold Store</div>
+                    <div class="dialogToggle">
+                        <i id="chatIcon" onclick="dialogGoldStoreHide();" class="fa fa-times fa-2"></i>
+                    </div>
+                </div>
+                <div id="riseStoreContents" style="background-color: rgb(51, 51, 51); height: 427px;">
+                    <div class="scroll">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/1.png"/>
+                                        <div>
+                                            <b>Bulbasaur</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="1" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="1" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/4.png"/>
+                                        <div>
+                                            <b>Charmander</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="4" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="4" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/7.png"/>
+                                        <div>
+                                            <b>Squirtle</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="7" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="7" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/10.png"/>
+                                        <div>
+                                            <b>Caterpie</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="10" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="10" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/13.png"/>
+                                        <div>
+                                            <b>Weedle</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="13" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="13" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/16.png"/>
+                                        <div>
+                                            <b>Pidgey</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="16" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="16" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/29.png"/>
+                                        <div>
+                                            <b>Nidoran</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="29" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="29" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/37.png"/>
+                                        <div>
+                                            <b>Vulpix</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="37" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="37" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/56.png"/>
+                                        <div>
+                                            <b>Mankey</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="56" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="56" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/63.png"/>
+                                        <div>
+                                            <b>Abra</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="63" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="63" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/79.png"/>
+                                        <div>
+                                            <b>Slowpoke</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="79" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="79" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/132.png"/>
+                                        <div>
+                                            <b>Ditto</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="132" data-type="1">
+                                                    Normal <span class="gold-label">10 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="132" data-type="2">
+                                                    Shiny <span class="gold-label">60 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/133.png"/>
+                                        <div>
+                                            <b>Eevee</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="133" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="133" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/152.png"/>
+                                        <div>
+                                            <b>Chikorita</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="152" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="152" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/155.png"/>
+                                        <div>
+                                            <b>Cyndaquil</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="155" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="155" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/158.png"/>
+                                        <div>
+                                            <b>Totodile</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="158" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="158" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/161.png"/>
+                                        <div>
+                                            <b>Sentret</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="161" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="161" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/163.png"/>
+                                        <div>
+                                            <b>Hoothoot</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="163" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="163" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/167.png"/>
+                                        <div>
+                                            <b>Spinarak</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="167" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="167" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/172.png"/>
+                                        <div>
+                                            <b>Pichu</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="172" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="172" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/175.png"/>
+                                        <div>
+                                            <b>Togepi</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="175" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="175" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/198.png"/>
+                                        <div>
+                                            <b>Murkrow</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="198" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="198" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/200.png"/>
+                                        <div>
+                                            <b>Misdreavus</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="200" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="200" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/201.png"/>
+                                        <div>
+                                            <b>Unown</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="201" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="201" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/222.png"/>
+                                        <div>
+                                            <b>Corsola</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="222" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="222" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/247.png"/>
+                                        <div>
+                                            <b>Pupitar</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="247" data-type="1">
+                                                    Normal <span class="gold-label">10 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="247" data-type="2">
+                                                    Shiny <span class="gold-label">60 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/252.png"/>
+                                        <div>
+                                            <b>Treecko</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="252" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="252" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/255.png"/>
+                                        <div>
+                                            <b>Torchic</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="255" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="255" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/258.png"/>
+                                        <div>
+                                            <b>Mudkip</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="258" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="258" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/263.png"/>
+                                        <div>
+                                            <b>Zigzagoon</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="263" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="263" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/270.png"/>
+                                        <div>
+                                            <b>Lotad</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="270" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="270" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/276.png"/>
+                                        <div>
+                                            <b>Taillow</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="276" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="276" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/296.png"/>
+                                        <div>
+                                            <b>Makuhita</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="296" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="296" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/298.png"/>
+                                        <div>
+                                            <b>Azurill</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="298" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="298" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/300.png"/>
+                                        <div>
+                                            <b>Skitty</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="300" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="300" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/333.png"/>
+                                        <div>
+                                            <b>Swablu</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="333" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="333" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/349.png"/>
+                                        <div>
+                                            <b>Feebas</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="349" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="349" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/359.png"/>
+                                        <div>
+                                            <b>Absol</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="359" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="359" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/371.png"/>
+                                        <div>
+                                            <b>Bagon</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="371" data-type="1">
+                                                    Normal <span class="gold-label">10 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="371" data-type="2">
+                                                    Shiny <span class="gold-label">60 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/387.png"/>
+                                        <div>
+                                            <b>Turtwig</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="387" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="387" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/390.png"/>
+                                        <div>
+                                            <b>Chimchar</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="390" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="390" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/393.png"/>
+                                        <div>
+                                            <b>Piplup</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="393" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="393" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/420.png"/>
+                                        <div>
+                                            <b>Cherubi</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="420" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="420" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/431.png"/>
+                                        <div>
+                                            <b>Glameow</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="431" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="431" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/433.png"/>
+                                        <div>
+                                            <b>Chingling</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="433" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="433" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/439.png"/>
+                                        <div>
+                                            <b>Mime-Jr</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="439" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="439" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/443.png"/>
+                                        <div>
+                                            <b>Gible</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="443" data-type="1">
+                                                    Normal <span class="gold-label">10 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="443" data-type="2">
+                                                    Shiny <span class="gold-label">60 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/446.png"/>
+                                        <div>
+                                            <b>Munchlax</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="446" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="446" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/451.png"/>
+                                        <div>
+                                            <b>Skorupi</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="451" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="451" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/458.png"/>
+                                        <div>
+                                            <b>Mantyke</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="458" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="458" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/459.png"/>
+                                        <div>
+                                            <b>Snover</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="459" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="459" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/479.png"/>
+                                        <div>
+                                            <b>Rotom</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="479" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="479" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/495.png"/>
+                                        <div>
+                                            <b>Snivy</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="495" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="495" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/498.png"/>
+                                        <div>
+                                            <b>Tepig</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="498" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="498" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/501.png"/>
+                                        <div>
+                                            <b>Oshawott</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="501" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="501" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/532.png"/>
+                                        <div>
+                                            <b>Timburr</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="532" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="532" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/540.png"/>
+                                        <div>
+                                            <b>Sewaddle</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="540" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="540" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/546.png"/>
+                                        <div>
+                                            <b>Cottonee</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="546" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="546" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/587.png"/>
+                                        <div>
+                                            <b>Emolga</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="587" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="587" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/602.png"/>
+                                        <div>
+                                            <b>Tynamo</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="602" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="602" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/607.png"/>
+                                        <div>
+                                            <b>Litwick</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="607" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="607" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/613.png"/>
+                                        <div>
+                                            <b>Cubchoo</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="613" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="613" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/624.png"/>
+                                        <div>
+                                            <b>Pawniard</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="624" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="624" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/633.png"/>
+                                        <div>
+                                            <b>Deino</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="633" data-type="1">
+                                                    Normal <span class="gold-label">10 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="633" data-type="2">
+                                                    Shiny <span class="gold-label">60 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/636.png"/>
+                                        <div>
+                                            <b>Larvesta</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="636" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="636" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/650.png"/>
+                                        <div>
+                                            <b>Chespin</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="650" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="650" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/653.png"/>
+                                        <div>
+                                            <b>Fennekin</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="653" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="653" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/656.png"/>
+                                        <div>
+                                            <b>Froakie</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="656" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="656" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/659.png"/>
+                                        <div>
+                                            <b>Bunnelby</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="659" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="659" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/661.png"/>
+                                        <div>
+                                            <b>Fletchling</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="661" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="661" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/674.png"/>
+                                        <div>
+                                            <b>Pancham</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="674" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="674" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/677.png"/>
+                                        <div>
+                                            <b>Espurr</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="677" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="677" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/679.png"/>
+                                        <div>
+                                            <b>Honedge</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="679" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="679" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/684.png"/>
+                                        <div>
+                                            <b>Swirlix</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="684" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="684" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/692.png"/>
+                                        <div>
+                                            <b>Clauncher</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="692" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="692" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/694.png"/>
+                                        <div>
+                                            <b>Helioptile</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="694" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="694" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/704.png"/>
+                                        <div>
+                                            <b>Goomy</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="704" data-type="1">
+                                                    Normal <span class="gold-label">10 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="704" data-type="2">
+                                                    Shiny <span class="gold-label">60 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/710.png"/>
+                                        <div>
+                                            <b>Pumpkaboo</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="710" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="710" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/722.png"/>
+                                        <div>
+                                            <b>Rowlet</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="722" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="722" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/725.png"/>
+                                        <div>
+                                            <b>Litten</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="725" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="725" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/728.png"/>
+                                        <div>
+                                            <b>Popplio</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="728" data-type="1">
+                                                    Normal <span class="gold-label">7 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="728" data-type="2">
+                                                    Shiny <span class="gold-label">42 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/731.png"/>
+                                        <div>
+                                            <b>Pikipek</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="731" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="731" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/736.png"/>
+                                        <div>
+                                            <b>Grubbin</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="736" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="736" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/739.png"/>
+                                        <div>
+                                            <b>Crabrawler</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="739" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="739" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/741.png"/>
+                                        <div>
+                                            <b>Oricorio</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="741" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="741" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/744.png"/>
+                                        <div>
+                                            <b>Rockruff</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="744" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="744" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/764.png"/>
+                                        <div>
+                                            <b>Comfey</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="764" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="764" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/766.png"/>
+                                        <div>
+                                            <b>Passimian</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="766" data-type="1">
+                                                    Normal <span class="gold-label">6 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="766" data-type="2">
+                                                    Shiny <span class="gold-label">36 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/771.png"/>
+                                        <div>
+                                            <b>Pyukumuku</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="771" data-type="1">
+                                                    Normal <span class="gold-label">3 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="771" data-type="2">
+                                                    Shiny <span class="gold-label">18 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/778.png"/>
+                                        <div>
+                                            <b>Mimikyu</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="778" data-type="1">
+                                                    Normal <span class="gold-label">10 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="778" data-type="2">
+                                                    Shiny <span class="gold-label">60 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="pokemon">
+                                        <img src="/play/images/standard/782.png"/>
+                                        <div>
+                                            <b>Jangmo-o</b>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <a href="" class="button button-blue gold-pokemon" data-id="782" data-type="1">
+                                                    Normal <span class="gold-label">8 Gold</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-12">
+                                                <a href="" class="button button-orange gold-pokemon" data-id="782" data-type="2">
+                                                    Shiny <span class="gold-label">48 Gold</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="gold">
+                        <span id="gold">0</span>
+                        Gold
+                    </div>
+                </div>
+            </div>
+            <div id="riseMap" class="dialogPanel ui-draggable" style="display:none;position: absolute; left: 10px; top: 10px; width: 600px; height: 450px; opacity: 1; height: 468px!important;">
+                <div class="dialogTitle">
+                    <div class="dialogTitleLabel ui-draggable-handle">Rise Map</div>
+                    <div class="dialogToggle">
+                        <i id="chatIcon" onclick="dialogMapHide();" class="fa fa-times fa-2"></i>
+                    </div>
+                </div>
+                <div id="riseMapContents" style="background-color: rgb(51, 51, 51); height: 427px;"></div>
+            </div>
+            <div id="riseStore" class="dialogPanel ui-draggable" style="display:none;position: absolute; left: 10px; top: 10px; width: 180px; height: 450px; opacity: 1; height: 468px!important;">
+                <div class="dialogTitle">
+                    <div class="dialogTitleLabel ui-draggable-handle">Pokemon Rise Store</div>
+                    <div class="dialogToggle">
+                        <i id="chatIcon" onclick="dialogStoreHide();" class="fa fa-times fa-2"></i>
+                    </div>
+                </div>
+                <div id="riseStoreContents" style="background-color: rgb(51, 51, 51); height: 427px;">
+                    <div id="store-tabs" class="tabs">
+                        <ul class="cf" style="margin-bottom: 4px;">
+                            <li class="active">
+                                <a href="#store-included">Premium</a>
+                            </li>
+                            <li class="">
+                                <a href="#store-gold">
+                                    <strong>BUY Gold</strong>
+                                </a>
+                            </li>
+                            <li class="">
+                                <a href="#store-money">Money</a>
+                            </li>
+                            <li class="">
+                                <a href="#store-items">Items</a>
+                            </li>
+                            <li class="">
+                                <a href="#store-box">Pokemon Boxes</a>
+                            </li>
+                            <li class="" style="display: none;">
+                                <a href="#mega-stones">Mega Stones</a>
+                            </li>
+                        </ul>
+                        <div class="tab-area content" id="store-gold">
+                            <div class="items-buy">
+                                <div class="row">
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/icons/gold-bars.png">
+                                            <span>200 Gold</span>
+                                        </h4>
+                                        <p>Can be used to purchase premium items from the store.</p>
+                                        <div class="clearfix">
+                                            <div class="pull-left">
+                                                <div class="store-price">
+                                                    $2.00 <span>EUR</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="product-200-GOLD">
+                                            <div class="number-input">
+                                                <button class="storeItemStepDown"></button>
+                                                <input class="quantity storeItemField" min="0" name="quantity" value="0" maxlength="2" max="99" value="1" type="number" data-product="200-GOLD" data-price="2">
+                                                <button class="plus storeItemStepUp"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/icons/gold-bars.png">
+                                            <span>550 Gold</span>
+                                        </h4>
+                                        <p>Can be used to purchase premium items from the store.</p>
+                                        <div class="clearfix">
+                                            <div class="pull-left">
+                                                <div class="store-price">
+                                                    $5.00 <span>EUR</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="product-550-GOLD">
+                                            <div class="number-input">
+                                                <button class="storeItemStepDown"></button>
+                                                <input class="quantity storeItemField" min="0" name="quantity" value="0" maxlength="2" max="99" value="1" type="number" data-product="550-GOLD" data-price="5">
+                                                <button class="plus storeItemStepUp"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/icons/gold-bars.png">
+                                            <span>1100 Gold</span>
+                                        </h4>
+                                        <p>Can be used to purchase premium items from the store.</p>
+                                        <div class="clearfix">
+                                            <div class="pull-left">
+                                                <div class="store-price">
+                                                    $10.00 <span>EUR</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="product-1100-GOLD">
+                                            <div class="number-input">
+                                                <button class="storeItemStepDown"></button>
+                                                <input class="quantity storeItemField" min="0" name="quantity" value="0" maxlength="2" max="99" value="1" type="number" data-product="1100-GOLD" data-price="10">
+                                                <button class="plus storeItemStepUp"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/icons/gold-bars.png">
+                                            <span>2750 Gold</span>
+                                        </h4>
+                                        <p>Can be used to purchase premium items from the store.</p>
+                                        <div class="clearfix">
+                                            <div class="pull-left">
+                                                <div class="store-price">
+                                                    $25.00 <span>EUR</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="product-2750-GOLD">
+                                            <div class="number-input">
+                                                <button class="storeItemStepDown"></button>
+                                                <input class="quantity storeItemField" min="0" name="quantity" value="0" maxlength="2" max="99" value="1" type="number" data-product="2750-GOLD" data-price="25">
+                                                <button class="plus storeItemStepUp"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/icons/gold-bars.png">
+                                            <span>5500 Gold</span>
+                                        </h4>
+                                        <p>Can be used to purchase premium items from the store.</p>
+                                        <div class="clearfix">
+                                            <div class="pull-left">
+                                                <div class="store-price">
+                                                    $50.00 <span>EUR</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="product-5500-GOLD">
+                                            <div class="number-input">
+                                                <button class="storeItemStepDown"></button>
+                                                <input class="quantity storeItemField" min="0" name="quantity" value="0" maxlength="2" max="99" value="1" type="number" data-product="5500-GOLD" data-price="50">
+                                                <button class="plus storeItemStepUp"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/icons/gold-bars.png">
+                                            <span>11,000 Gold</span>
+                                        </h4>
+                                        <p>Can be used to purchase premium items from the store.</p>
+                                        <div class="clearfix">
+                                            <div class="pull-left">
+                                                <div class="store-price">
+                                                    $100.00 <span>EUR</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="product-11000-GOLD">
+                                            <div class="number-input">
+                                                <button class="storeItemStepDown"></button>
+                                                <input class="quantity storeItemField" min="0" name="quantity" value="0" maxlength="2" max="99" value="1" type="number" data-product="11000-GOLD" data-price="100">
+                                                <button class="plus storeItemStepUp"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <center>
+                                <div id='button-purchase' style='display:none;cursor:pointer;margin-top: 10px;' class="saleItem">PURCHASE
+                                </div>
+                            </center>
+                        </div>
+                        <div class="tab-area content active" id="store-included">
+                            <div class="items">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h4 style="margin: 0; padding: 4px 0 8px; color: #FFF; text-align: center;">
+                                            By buying from the store you'll become a premium member.<br/>
+                                            <small>Here's what premium has to offer!</small>
+                                            <br/>
+                                            <br/>
+                                            <small>All orders are non refundable and to be done through PayPal</small>
+                                        </h4>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>Gold Name!</h4>
+                                        <p>
+                                            Stand out from the crowd with a gold name!<br/>All purchases include this!
+                                        </p>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>15% Extra EXP!</h4>
+                                        <p>Gain an extra 15% EXP for every battle! All purchases include this!</p>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>Discord Gold Name!</h4>
+                                        <p>Stand out on our Discord server with a gold name!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-area content" id="store-money">
+                            <div class="items">
+                                <div class="row">
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/dragon-gem.png">
+                                            <span>$100,000</span>
+                                        </h4>
+                                        <p>Cold, Hard Cash. In game currency can be used to purchase items, outfits and hairstyles.</p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="100k" data-price="300" style="display: block; margin-top: 5px;">Buy Now (300 Gold)</button>
+                                    </div>
+                                    <div class="saleItem  col-6">
+                                        <h4>
+                                            <img src="/play/images/items/dragon-gem.png">
+                                            <span>$250,000</span>
+                                        </h4>
+                                        <p>Cold, Hard Cash. In game currency can be used to purchase items, outfits and hairstyles.</p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="250k" data-price="550" style="display: block; margin-top: 5px;">Buy Now (550 Gold)</button>
+                                    </div>
+                                    <div class="saleItem  col-6">
+                                        <h4>
+                                            <img src="/play/images/items/dragon-gem.png">
+                                            <span>$500,000</span>
+                                        </h4>
+                                        <p>Cold, Hard Cash. In game currency can be used to purchase items, outfits and hairstyles.</p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="500k" data-price="750" style="display: block; margin-top: 5px;">Buy Now (750 Gold)</button>
+                                    </div>
+                                    <div class="saleItem  col-6">
+                                        <h4>
+                                            <img src="/play/images/items/dragon-gem.png">
+                                            <span>$1,000,000</span>
+                                        </h4>
+                                        <p>Cold, Hard Cash. In game currency can be used to purchase items, outfits and hairstyles.</p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="1m" data-price="1200" style="display: block; margin-top: 5px;">Buy Now (1200 Gold)</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="user-gold shopMoney"></div>
+                        </div>
+                        <div class="tab-area content" id="store-items">
+                            <div class="items">
+                                <div class="row">
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/exp-share.png">
+                                            <span>Experience Share</span>
+                                        </h4>
+                                        <p>
+                                            Distribute additional experience across your team even if they are not on the battlefield.<br/>&nbsp;
+                                        </p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="exp-share" data-price="400" style="display: block; margin-top: 5px;">Buy Now (400 Gold)</button>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/rare-candy.png">
+                                            <span>x30 Rare Candy Pack</span>
+                                        </h4>
+                                        <p>Need to get a head start or make it to 100 as easily as possible. Rare candies will increase a Pokemon's level by one point each.</p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="30-candies" data-price="1100" style="display: block; margin-top: 5px;">Buy Now (1100 Gold)</button>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/rare-candy.png">
+                                            <span>x60 Rare Candy Pack</span>
+                                        </h4>
+                                        <p>Need to get a head start or make it to 100 as easily as possible. Rare candies will increase a Pokemon's level by one point each.</p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="60-candies" data-price="2100" style="display: block; margin-top: 5px;">Buy Now (2100 Gold)</button>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/rare-candy.png">
+                                            <span>x100 Rare Candy Pack</span>
+                                        </h4>
+                                        <p>Need to get a head start or make it to 100 as easily as possible. Rare candies will increase a Pokemon's level by one point each.</p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="100-candies" data-price="2900" style="display: block; margin-top: 5px;">Buy Now (2900 Gold)</button>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/reroll.png">
+                                            <span>x1 IV Reroll</span>
+                                        </h4>
+                                        <p>
+                                            Will reroll the IVs of a single Pokemon <br/>
+                                            <strong style="padding: 5px 0;display: inline-block;">**Does not guarantee better IVs**</strong>
+                                            .
+                                        </p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="1-ivroll" data-price="550" style="display: block; margin-top: 5px;">Buy Now (550 Gold)</button>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/reroll.png">
+                                            <span>x3 IV Reroll</span>
+                                        </h4>
+                                        <p>
+                                            Will reroll the IVs of a single Pokemon <br/>
+                                            <strong style="padding: 5px 0;display: inline-block;">**Does not guarantee better IVs**</strong>
+                                            .
+                                        </p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="3-ivroll" data-price="1300" style="display: block; margin-top: 5px;">Buy Now (1300 Gold)</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="user-gold shopMoney"></div>
+                        </div>
+                        <div class="tab-area content" id="store-box">
+                            <div class="items">
+                                <div class="row">
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/pokemon-box.png">
+                                            <span>Kanto Pokemon Box</span>
+                                        </h4>
+                                        <p>This box contains a random Pokemon from the Kanto region with a small chance of being shiny.</p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="pokemonbox-kanto" data-price="150" style="display: block; margin-top: 5px;">Buy Now (150 Gold)</button>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/pokemon-box.png">
+                                            <span>Johto Pokemon Box</span>
+                                        </h4>
+                                        <p>This box contains a random Pokemon from the Johto region with a small chance of being shiny.</p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="pokemonbox-johto" data-price="150" style="display: block; margin-top: 5px;">Buy Now (150 Gold)</button>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/pokemon-box.png">
+                                            <span>Hoenn Pokemon Box</span>
+                                        </h4>
+                                        <p>This box contains a random Pokemon from the Hoenn region with a small chance of being shiny.</p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="pokemonbox-hoenn" data-price="150" style="display: block; margin-top: 5px;">Buy Now (150 Gold)</button>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/pokemon-box.png">
+                                            <span>Sinnoh Pokemon Box</span>
+                                        </h4>
+                                        <p>This box contains a random Pokemon from the Sinnoh region with a small chance of being shiny.</p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="pokemonbox-sinnoh" data-price="150" style="display: block; margin-top: 5px;">Buy Now (150 Gold)</button>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/pokemon-box.png">
+                                            <span>Unova Pokemon Box</span>
+                                        </h4>
+                                        <p>This box contains a random Pokemon from the Unova region with a small chance of being shiny.</p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="pokemonbox-unova" data-price="150" style="display: block; margin-top: 5px;">Buy Now (150 Gold)</button>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/pokemon-box.png">
+                                            <span>Kalos Pokemon Box</span>
+                                        </h4>
+                                        <p>This box contains a random Pokemon from the Kalos region with a small chance of being shiny.</p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="pokemonbox-kalos" data-price="150" style="display: block; margin-top: 5px;">Buy Now (150 Gold)</button>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/pokemon-box.png">
+                                            <span>Alolan Pokemon Box</span>
+                                        </h4>
+                                        <p>This box contains a random Pokemon from the Alolan region with a small chance of being shiny.</p>
+                                        <button class="buy-btn btn-block buy-gold-item" data-product="pokemonbox-alolan" data-price="150" style="display: block; margin-top: 5px;">Buy Now (150 Gold)</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="user-gold shopMoney"></div>
+                        </div>
+                        <div class="tab-area content" id="mega-stones">
+                            <div class="items">
+                                <div class="row">
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/venusaurite.png">
+                                            <span>Venusaurite</span>
+                                        </h4>
+                                        <p>One variety of the mysterious Mega Stones.</p>
+                                        <div class="add">
+                                            <div data-product="VENUSAURITE" data-toggle="false" data-price="5" onclick="btnToggle(this);" class="purchase-check" style=""></div>
+                                            $5 EUR
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/charizardite-x.png">
+                                            <span>Charizardite X</span>
+                                        </h4>
+                                        <p>One variety of the mysterious Mega Stones.</p>
+                                        <div class="add">
+                                            <div data-product="CHARIZARDITE-X" data-toggle="false" data-price="5" onclick="btnToggle(this);" class="purchase-check" style=""></div>
+                                            $5 EUR
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/charizardite-y.png">
+                                            <span>Charizardite Y</span>
+                                        </h4>
+                                        <p>One variety of the mysterious Mega Stones.</p>
+                                        <div class="add">
+                                            <div data-product="CHARIZARDITE-Y" data-toggle="false" data-price="5" onclick="btnToggle(this);" class="purchase-check" style=""></div>
+                                            $5 EUR
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/blastoisinite.png">
+                                            <span>Blastoisinite</span>
+                                        </h4>
+                                        <p>One variety of the mysterious Mega Stones.</p>
+                                        <div class="add">
+                                            <div data-product="BLASTOISINITE" data-toggle="false" data-price="5" onclick="btnToggle(this);" class="purchase-check" style=""></div>
+                                            $5 EUR
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/mewtwonite-x.png">
+                                            <span>Mewtwonite X</span>
+                                        </h4>
+                                        <p>One variety of the mysterious Mega Stones.</p>
+                                        <div class="add">
+                                            <div data-product="MEWTWONITE-X" data-toggle="false" data-price="5" onclick="btnToggle(this);" class="purchase-check" style=""></div>
+                                            $5 EUR
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/mewtwonite-y.png">
+                                            <span>Mewtwonite Y</span>
+                                        </h4>
+                                        <p>One variety of the mysterious Mega Stones.</p>
+                                        <div class="add">
+                                            <div data-product="MEWTWONITE-Y" data-toggle="false" data-price="5" onclick="btnToggle(this);" class="purchase-check" style=""></div>
+                                            $5 EUR
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/lucarionite.png">
+                                            <span>Lucarionite</span>
+                                        </h4>
+                                        <p>One variety of the mysterious Mega Stones.</p>
+                                        <div class="add">
+                                            <div data-product="LUCARIONITE" data-toggle="false" data-price="5" onclick="btnToggle(this);" class="purchase-check" style=""></div>
+                                            $5 EUR
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/Steelixite.png">
+                                            <span>Steelixite</span>
+                                        </h4>
+                                        <p>One variety of the mysterious Mega Stones.</p>
+                                        <div class="add">
+                                            <div data-product="STEELIXITE" data-toggle="false" data-price="5" onclick="btnToggle(this);" class="purchase-check" style=""></div>
+                                            $5 EUR
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/aerodactylite.png">
+                                            <span>Aerodactylite</span>
+                                        </h4>
+                                        <p>One variety of the mysterious Mega Stones.</p>
+                                        <div class="add">
+                                            <div data-product="AERODACTYLITE" data-toggle="false" data-price="5" onclick="btnToggle(this);" class="purchase-check" style=""></div>
+                                            $5 EUR
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/pinsirite.png">
+                                            <span>Pinsirite</span>
+                                        </h4>
+                                        <p>One variety of the mysterious Mega Stones.</p>
+                                        <div class="add">
+                                            <div data-product="PINSIRITE" data-toggle="false" data-price="5" onclick="btnToggle(this);" class="purchase-check" style=""></div>
+                                            $5 EUR
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/gyaradosite.png">
+                                            <span>Gyaradosite</span>
+                                        </h4>
+                                        <p>One variety of the mysterious Mega Stones.</p>
+                                        <div class="add">
+                                            <div data-product="GYARADOSITE" data-toggle="false" data-price="5" onclick="btnToggle(this);" class="purchase-check" style=""></div>
+                                            $5 EUR
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/scizorite.png">
+                                            <span>Scizorite</span>
+                                        </h4>
+                                        <p>One variety of the mysterious Mega Stones.</p>
+                                        <div class="add">
+                                            <div data-product="SCIZORITE" data-toggle="false" data-price="5" onclick="btnToggle(this);" class="purchase-check" style=""></div>
+                                            $5 EUR
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/alakazite.png">
+                                            <span>Alakazite</span>
+                                        </h4>
+                                        <p>One variety of the mysterious Mega Stones.</p>
+                                        <div class="add">
+                                            <div data-product="ALAKAZITE" data-toggle="false" data-price="10" onclick="btnToggle(this);" class="purchase-check" style=""></div>
+                                            $10 EUR
+                                        </div>
+                                    </div>
+                                    <div class="saleItem col-6">
+                                        <h4>
+                                            <img src="/play/images/items/kangaskanite.png">
+                                            <span>Kangaskanite</span>
+                                        </h4>
+                                        <p>One variety of the mysterious Mega Stones.</p>
+                                        <div class="add">
+                                            <div data-product="KANGASKHANITE" data-toggle="false" data-price="10" onclick="btnToggle(this);" class="purchase-check" style=""></div>
+                                            $10 EUR
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script>
+                $(".color-picker").spectrum({
+                    color: "#999",
+                    preferredFormat: "rgb"
+                });
+            </script>
+            <script>
+                (function(i, s, o, g, r, a, m) {
+                    i['GoogleAnalyticsObject'] = r;
+                    i[r] = i[r] || function() {
+                        (i[r].q = i[r].q || []).push(arguments)
+                    }
+                    ,
+                    i[r].l = 1 * new Date();
+                    a = s.createElement(o),
+                    m = s.getElementsByTagName(o)[0];
+                    a.async = 1;
+                    a.src = g;
+                    m.parentNode.insertBefore(a, m)
+                }
+                )(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+                ga('create', 'UA-93591657-1', 'auto');
+                ga('send', 'pageview');
+            </script>
+            <script type="text/javascript">
+
+                var definitions = ["play\/definitions\/body_angry_eyes.json", "play\/definitions\/pantsQuartz.json", "play\/definitions\/hatCaps.json", "play\/definitions\/net.json", "play\/definitions\/hairMaleSpikey.json", "play\/definitions\/backwardsHat.json", "play\/definitions\/body.json", "play\/definitions\/shirt.json", "play\/definitions\/ninja_hair.json", "play\/definitions\/hatFemaleOccupation.json", "play\/definitions\/maleComboverHair.json", "play\/definitions\/topHatSet1.json", "play\/definitions\/hairMaleClemont.json", "play\/definitions\/christmasShirts.json", "play\/definitions\/pantsLab.json", "play\/definitions\/hairFemaleNurse.json", "play\/definitions\/suitShirts.json", "play\/definitions\/teamRocketJessieHair.json", "play\/definitions\/pokemonHats.json", "play\/definitions\/christmasHats.json", "play\/definitions\/hairFemaleTopknot.json", "play\/definitions\/hairMaleDistinct.json", "play\/definitions\/hatsSet1.json", "play\/definitions\/teamRocketShirt.json", "play\/definitions\/shirtQuartz.json", "play\/definitions\/neo_hairs.json", "play\/definitions\/teamRocketShoes.json", "play\/definitions\/shoe.json", "play\/definitions\/bag.json", "play\/definitions\/teamShirts.json", "play\/definitions\/shoesQuartz.json", "play\/definitions\/femaleTiedHair.json", "play\/definitions\/long_goggles_hair.json", "play\/definitions\/beanie2.json", "play\/definitions\/beanie.json", "play\/definitions\/body_scared_eyes.json", "play\/definitions\/hairFemale.json", "play\/definitions\/wings2.json", "play\/definitions\/pantsFemaleOccupation.json", "play\/definitions\/femalePigtailHair.json", "play\/definitions\/hairFemaleCurlyLong.json", "play\/definitions\/christmasHair.json", "play\/definitions\/runningShoes.json", "play\/definitions\/beanie3.json", "play\/definitions\/mean_body.json", "play\/definitions\/animal_hair.json", "play\/definitions\/candyCaneHairMale.json", "play\/definitions\/hairFemalePonytail.json", "play\/definitions\/maddyHair.json", "play\/definitions\/teamHats.json", "play\/definitions\/gkhair.json", "play\/definitions\/halloween_hats_two.json", "play\/definitions\/pokemon.json", "play\/definitions\/christmasShoes.json", "play\/definitions\/hatQuartz.json", "play\/definitions\/hairMaleWhiff.json", "play\/definitions\/scaff.json", "play\/definitions\/shirtLab.json", "play\/definitions\/teamPants.json", "play\/definitions\/mixedHats.json", "play\/definitions\/suitHats.json", "play\/definitions\/maleSoyboyHair.json", "play\/definitions\/hairFemaleCurls.json", "play\/definitions\/neo_shirts.json", "play\/definitions\/pigtail_drills_hair.json", "play\/definitions\/gym_leaders.json", "play\/definitions\/body_button_eyes.json", "play\/definitions\/christmasPants.json", "play\/definitions\/capes.json", "play\/definitions\/crowns.json", "play\/definitions\/neo_hats.json", "play\/definitions\/hairMaleMohawk.json", "play\/definitions\/shirtFemaleOccupation.json", "play\/definitions\/ponytail_drill_hair.json", "play\/definitions\/wings.json", "play\/definitions\/suitShoes.json", "play\/definitions\/hairMale.json", "play\/definitions\/teamRocketPants.json", "play\/definitions\/teamRocketJamesHair.json", "play\/definitions\/pants.json", "play\/definitions\/short_mohawk_hair.json", "play\/definitions\/shirtFemale.json", "play\/definitions\/ponytail_drill_hair2.json", "play\/definitions\/hairFemaleBeads.json", "play\/definitions\/parasol.json", "play\/definitions\/emotes.json", "play\/definitions\/glasses.json", "play\/definitions\/hairFemaleCandyCane.json", "play\/definitions\/halloweenHats.json", "play\/definitions\/skitty.json", "play\/definitions\/suitPants.json", "play\/definitions\/pantsFemale.json"];
+
+                function otherOptions(id) {
+                    var html = '';
+
+                    return html;
+                }
+            </script>
+    </body>
+</html>

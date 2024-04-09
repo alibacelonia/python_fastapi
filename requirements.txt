@@ -48,3 +48,4 @@ pyotp
 pycryptodome
 qrcode[pil]
 pillow
+cachetools

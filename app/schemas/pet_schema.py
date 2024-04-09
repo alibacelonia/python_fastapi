@@ -3,7 +3,28 @@ from typing import List, Optional
 from uuid import UUID
 from pydantic import BaseModel, EmailStr, constr
 from app.schemas.user_schema import FilteredUserResponse, CreateUserSchema, PetDetailsUserResponse
-
+import uuid
+class Allergies(BaseModel):
+    allergy: str 
+    symptoms: str 
+    class Config:
+        orm_mode = True
+    
+class Medications(BaseModel):
+    name: str
+    brand: str
+    dosage: str
+    prescription: str
+    class Config:
+        orm_mode = True
+    
+class Vaccines(BaseModel):
+    name: str
+    type: str
+    clinic: str
+    date: datetime | str
+    class Config:
+        orm_mode = True
     
 class PetBaseSchema(BaseModel):
     microchip_id: str | None  = None
@@ -19,6 +40,11 @@ class PetBaseSchema(BaseModel):
     date_of_birth_month: int | None  = None
     date_of_birth_year: int | None  = None
     owner_id: UUID | None = None
+    no_of_scans: int | None = 0
+    
+    allergies: List[Allergies] = []
+    medications: List[Medications] = []
+    vaccines: List[Vaccines] = []
 
     class Config:
         orm_mode = True

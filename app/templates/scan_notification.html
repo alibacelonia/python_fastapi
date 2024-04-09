@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>OTP</title>
+    <title>Scan Notification</title>
 
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
@@ -61,40 +61,46 @@
     border-color: #0280e3 !important;
   }
 
-  a {
-    text-decoration: none;
-  }
 </style>
 </head>
   <body
     style="
       margin: 0;
       font-family: 'Poppins', sans-serif;
+      background: #ffffff;
       font-size: 14px;
-      background: #f4f7ff;
     "
   >
     <div
       style="
-        padding: 20px 30px 20px;
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 45px 30px;
+        background: #f4f7ff;
+        background-repeat: no-repeat;
+        background-size: 800px 452px;
+        background-position: top center;
+        font-size: 14px;
+        color: #434343;
       "
     >
 
       <main>
         <div
           style="
-            padding: 45px 0px;
+            margin: 0;
+            padding: 30px 30px;
             background: #ffffff;
-            text-align: center;
+            text-align: left;
           "
         >
            <table style="width:100%;">
             <tbody>
                 <tr>
-                    <td align="right" style="width:50%;">
+                    <td align="left" style="width: auto;">
                         <img src="https://petnfc.com.au/logo/3.png" height="50px">
                     </td>
-                    <td align="left"  style="width:50%;">
+                    <td align="left"  style="width:100%;">
                         <h1 style="
                             color: #0169BB;
                             font-weight: 700;
@@ -104,23 +110,20 @@
             </tbody>
 
            </table>
-
-           <h1 style="color:#e11d48;">ACCOUNT ALREADY VERIFIED</h1>
-           <p style="color:#fb7185;">Email can only be verified once</p>
-            <div class="control">
-                <br>
-                <a href="/" style="color: #3b82f6;">Back to Website</a>
-                <br>
-                <br>
-                <a href="/signin" style="color: #3b82f6;">Proceed to Login</a>
-            </div>
+           <h2 style="color: #374151; font-weight: 700;">Friendly Reminder: Pet Tag Scanned! </h2>
+           <hr color="#9ca3af" style="margin-bottom: 2.5rem;">
+           <p style="color: #374151">Hi <span style="font-weight: bold; text-transform: capitalize;">{{first_name}}</span>,</p>
+           <p style="color: #374151">Just a quick heads-up! Someone scanned your pet's tag anonymously in <a href="https://www.google.com/maps?q={{latitude}},{{longitude}}&z=13&t=m
+            " target="_blank">this</a> location. Nothing to worry about, but it's always good to stay aware and keep your furry friend safe. </p>
+           <br/>
         </div>
 
         <p
           style="
             max-width: 400px;
             margin: 0 auto;
-            margin-top: 90px;
+            margin-top: 35px;
+            margin-bottom: 25px;
             text-align: center;
             font-weight: 500;
             color: #8c8c8c;
@@ -139,7 +142,7 @@
         style="
           width: 100%;
           max-width: 490px;
-          margin: 20px auto 0;
+          margin: 10px auto 0;
           text-align: center;
           border-top: 1px solid #e6ebf1;
         "

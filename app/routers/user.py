@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy import Column, DateTime, MetaData, String, Table
+from sqlalchemy import Column, DateTime, MetaData, String, Table, select
 from app.email import Email
 
 from app.schemas.pet_schema import UpdatePetSchema
@@ -157,3 +157,23 @@ async def reset_password_confirm(
 ):
     token = await user_repo.confirm_password_reset(db, reset_token, new_password)
     return token
+
+
+@router.post("/update-settings")
+async def update_settings(settings: dict, db: Session = Depends(get_session), user_id: str = Depends(oauth2.require_user)):
+    pet_query = await db.execute(
+            select(models.User).where(models.User.id == user_id)
+        )
+    selected_user: UserResponse = pet_query.scalar_one_or_none()
+
+    if not selected_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'User not found')
+        
+    
+    selected_user.settings = settings
+    
+    await db.commit()
+    await db.refresh(selected_user)
+        
+    return selected_user

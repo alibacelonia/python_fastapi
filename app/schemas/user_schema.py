@@ -43,6 +43,7 @@ class CreateUserSchema(UserBaseSchema):
     otp_secret: str = None
     otp_created_at: datetime = None
     
+    settings: dict = None
     status: str = 'active'
 
 
@@ -74,6 +75,8 @@ class UpdateUserSchema(BaseModel):
     otp: str = None
     otp_secret: str = None
     otp_created_at: datetime = None
+    
+    settings: dict = None
 
 
 class LoginUserSchema(BaseModel):
@@ -116,6 +119,8 @@ class UserResponse(UserBaseSchema):
     role: str = 'user'
     
     status: str = 'active'
+    
+    settings: dict = None
     
     created_at: datetime
     updated_at: datetime

@@ -17,13 +17,16 @@ class EmailSchema(BaseModel):
 
 
 class Email:
-    def __init__(self, user: models.User, url: str = None, email: List[EmailStr] = None, otp_code: str = None):
+    def __init__(self, user: models.User, url: str = None, email: List[EmailStr] = None, otp_code: str = None, pet: models.Pet = None, coordinates: dict = None):
         self.name = user.firstname
         # self.name = user.firstname + " " + user.lastname
         self.sender = 'PetNFC <support@petnfc.com.au>'
         self.email = email
         self.url = url
         self.otp_code = otp_code
+        self.pet_name = pet.name
+        self.latitude = float(coordinates['latitude'])
+        self.longitude = float(coordinates['longitude'])
         pass
 
     async def sendMail(self, subject, template, **kwargs):
@@ -32,6 +35,7 @@ class Email:
             MAIL_USERNAME=settings.EMAIL_USERNAME,
             MAIL_PASSWORD=settings.EMAIL_PASSWORD,
             MAIL_FROM=settings.EMAIL_FROM,
+            MAIL_FROM_NAME=f'PetNFC <{settings.EMAIL_FROM}>',
             MAIL_PORT=settings.EMAIL_PORT,
             MAIL_SERVER=settings.EMAIL_HOST,
             MAIL_STARTTLS=False,
@@ -65,3 +69,6 @@ class Email:
         
     async def sendResetLink(self):
         await self.sendMail(subject='Password Reset Request', template='reset_password', url=self.url, first_name=self.name)
+        
+    async def sendScanNotificationEmail(self):
+        await self.sendMail(subject='Pet Tag Scanned Notification', template='scan_notification', url=self.url, first_name=self.name, pet_name=self.pet_name, latitude=self.latitude, longitude=self.longitude)

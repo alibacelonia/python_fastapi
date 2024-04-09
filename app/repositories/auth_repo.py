@@ -99,3 +99,15 @@ async def create_user(db: Session, request: Request, payload: CreateUserSchema):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail='There was an error sending email')
     return new_user
+
+
+async def send_email_verification(db: Session, request: Request, token, user: models.User, email):
+    try:
+        url = f"{request.url.scheme}://{request.client.host}:{request.url.port}/api/v2/auth/verifyemail/{token.hex()}"
+        await Email(user, url, [email]).sendVerificationCode()
+    except Exception as error:
+        print('Error', error)
+        user.verification_code = None
+        await db.commit()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail='There was an error sending email')
