@@ -24,9 +24,8 @@ class Email:
         self.email = email
         self.url = url
         self.otp_code = otp_code
-        self.pet_name = pet.name
-        self.latitude = float(coordinates['latitude'])
-        self.longitude = float(coordinates['longitude'])
+        self.pet = pet
+        self.location = coordinates
         pass
 
     async def sendMail(self, subject, template, **kwargs):
@@ -71,4 +70,4 @@ class Email:
         await self.sendMail(subject='Password Reset Request', template='reset_password', url=self.url, first_name=self.name)
         
     async def sendScanNotificationEmail(self):
-        await self.sendMail(subject='Pet Tag Scanned Notification', template='scan_notification', url=self.url, first_name=self.name, pet_name=self.pet_name, latitude=self.latitude, longitude=self.longitude)
+        await self.sendMail(subject='Pet Tag Scanned Notification', template='scan_notification', url=self.url, first_name=self.name, pet_name=self.pet.name, latitude=self.location["latitude"], longitude=self.location["longitude"])

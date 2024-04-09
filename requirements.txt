@@ -49,3 +49,6 @@ pycryptodome
 qrcode[pil]
 pillow
 cachetools
+aiohttp
+boto3
+botocore

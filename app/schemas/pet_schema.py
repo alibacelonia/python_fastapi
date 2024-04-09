@@ -42,9 +42,9 @@ class PetBaseSchema(BaseModel):
     owner_id: UUID | None = None
     no_of_scans: int | None = 0
     
-    allergies: List[Allergies] = []
-    medications: List[Medications] = []
-    vaccines: List[Vaccines] = []
+    allergies: str = None
+    medications: str = None
+    vaccines: str = None
 
     class Config:
         orm_mode = True

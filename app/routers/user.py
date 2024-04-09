@@ -131,12 +131,13 @@ async def reset_password(email: str = Form(...), db: Session = Depends(get_sessi
         # You would typically validate the email here
         # For simplicity, let's assume the email is valid
         user = await user_repo.check_email_for_pwreset(email, db)
+        
         # Create a reset token and send it to the user (e.g., via email)
         reset_token = await user_repo.create_reset_token(db, email)
-        # You would usually send the reset token to the user via email here
+        # # You would usually send the reset token to the user via email here
         try:
             url = f"http://localhost:3000/change-password/{reset_token}"
-            await Email(user, url, [email.lower()]).sendResetLink()
+            await Email(user=user, url=url, email=[email.lower()]).sendResetLink()
         except Exception as error:
             print('Error', error)
             await db.commit()
